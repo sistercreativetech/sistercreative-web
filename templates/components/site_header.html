@@ -1,0 +1,29 @@
+<header class="sticky top-0 z-20 border-b border-line/80 bg-white/90 backdrop-blur-lg"
+        id="beranda">
+  <div class="container-site relative flex min-h-19 items-center justify-between">
+    {% include "components/brand.html" %}
+    <button type="button"
+            class="inline-grid size-11 place-items-center rounded-button text-ink md:hidden"
+            data-menu-button
+            aria-label="Buka menu"
+            aria-expanded="false"
+            aria-controls="main-nav">
+      <span data-icon-open>{% include "components/icon.html" with name="menu" class="size-6" %}</span>
+      <span class="hidden" data-icon-close>{% include "components/icon.html" with name="x" class="size-6" %}</span>
+    </button>
+    <nav id="main-nav"
+         data-menu
+         aria-label="Navigasi utama"
+         class="absolute inset-x-0 top-full mt-2 hidden flex-col gap-1 rounded-card border border-line bg-white p-4 shadow-soft md:static md:mt-0 md:flex md:flex-row md:items-center md:gap-7 md:border-0 md:bg-transparent md:p-0 md:shadow-none">
+      {% url 'core:home' as home_url %}
+      <a href="{{ home_url }}#layanan"
+         class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Layanan</a>
+      <a href="{{ home_url }}#portofolio"
+         class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Portofolio</a>
+      <a href="{{ home_url }}#proses"
+         class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Proses</a>
+      <a href="{{ home_url }}#kontak"
+         class="mt-2 rounded-full bg-ink px-4 py-2.5 text-center text-base font-semibold text-white hover:bg-primary md:mt-0">Konsultasi</a>
+    </nav>
+  </div>
+</header>

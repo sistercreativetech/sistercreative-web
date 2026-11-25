@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block header %}
+  {% include "components/site_header.html" %}
+{% endblock header %}
+{% block content %}
+  {# Hero #}
+  <section class="bg-hero overflow-hidden pt-14 pb-18 md:pt-24 md:pb-22"
+           aria-labelledby="hero-title">
+    <div class="container-site grid items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
+      <div data-reveal>
+        <p class="mb-3.5 text-eyebrow font-extrabold uppercase text-primary">Website • Aplikasi • Automasi</p>
+        <h1 id="hero-title" class="max-w-3xl text-display font-extrabold">
+          Kerja lebih ringan dengan sistem digital yang tepat.
+        </h1>
+        <p class="mt-6 mb-8 max-w-2xl text-lg text-muted">
+          Kami membantu UMKM, sekolah, dan lembaga membuat website, aplikasi sederhana, bot, serta automasi yang mudah digunakan.
+        </p>
+        <div class="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          {% include "components/whatsapp_button.html" with text=wa_messages.hero label="Konsultasi via WhatsApp" %}
+          <a href="#layanan"
+             class="inline-flex min-h-13 items-center justify-center rounded-button border border-line bg-white px-6 font-extrabold transition hover:-translate-y-0.5 hover:border-primary motion-reduce:transition-none motion-reduce:hover:translate-y-0">Lihat layanan</a>
+        </div>
+        <ul class="mt-7 grid gap-2 text-sm font-semibold text-muted sm:flex sm:flex-wrap sm:gap-5"
+            aria-label="Keunggulan">
+          {% for point in trust_points %}
+            <li class="flex items-center gap-1.5">
+              {% include "components/icon.html" with name="check" class="size-4 text-primary" %}
+              {{ point }}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <figure class="max-w-xl overflow-hidden rounded-panel bg-dark text-white shadow-soft lg:rotate-[1.6deg]"
+              data-reveal
+              data-reveal-delay="0.15">
+        <div class="flex h-13 items-center gap-2 border-b border-white/10 px-5"
+             aria-hidden="true">
+          <span class="size-2.5 rounded-full bg-danger"></span>
+          <span class="size-2.5 rounded-full bg-accent"></span>
+          <span class="size-2.5 rounded-full bg-success"></span>
+        </div>
+        <div class="p-6 md:p-8">
+          <figcaption class="mb-6 text-eyebrow font-bold uppercase text-on-dark-muted">Alur kerja otomatis</figcaption>
+          <ol class="flex flex-col">
+            {% for step in hero_flow %}
+              {% if not forloop.first %}
+                <li class="ml-8 h-5 border-l border-dashed border-on-dark-muted/50"
+                    aria-hidden="true"></li>
+              {% endif %}
+              <li class="flex items-center gap-4.5 rounded-2xl border p-4.5 {% if step.active %}border-transparent bg-primary{% else %}border-white/10{% endif %}">
+                <span class="text-xs font-extrabold text-accent">0{{ forloop.counter }}</span>
+                <span class="flex flex-col">
+                  <b>{{ step.title }}</b>
+                  <small class="mt-0.5 {% if step.active %}text-primary-soft{% else %}text-on-dark-muted{% endif %}">{{ step.detail }}</small>
+                </span>
+              </li>
+            {% endfor %}
+          </ol>
+        </div>
+      </figure>
+    </div>
+  </section>
+  {# Layanan #}
+  <section class="py-18 md:py-24" id="layanan" aria-labelledby="layanan-title">
+    <div class="container-site">
+      {% include "components/section_head.html" with eyebrow="Layanan" title="Solusi digital untuk pekerjaan sehari-hari" intro="Pilih layanan sesuai kebutuhan. Setiap sistem dapat disesuaikan dengan alur kerja usaha atau lembaga Anda." heading_id="layanan-title" %}
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {% for service in services %}
+          <article class="rounded-card border border-line bg-white p-6 transition hover:-translate-y-1 hover:border-transparent hover:shadow-soft motion-reduce:transition-none motion-reduce:hover:translate-y-0 md:p-8 lg:min-h-65"
+                   data-reveal>
+            <div class="flex items-center justify-between">
+              <span class="grid size-11 place-items-center rounded-xl bg-primary-soft text-primary">
+                {% include "components/icon.html" with name=service.icon class="size-5" %}
+              </span>
+              <span class="text-xs font-extrabold text-primary">0{{ forloop.counter }}</span>
+            </div>
+            <h3 class="mt-8 mb-2.5 text-xl font-bold leading-snug">{{ service.title }}</h3>
+            <p class="text-muted">{{ service.description }}</p>
+          </article>
+        {% endfor %}
+        <article class="rounded-card border border-primary bg-primary p-6 text-white md:p-8 lg:min-h-65"
+                 data-reveal>
+          <div class="flex items-center justify-between">
+            <span class="grid size-11 place-items-center rounded-xl bg-white/15">
+              {% include "components/icon.html" with name="sparkles" class="size-5" %}
+            </span>
+            <span class="text-xs font-extrabold text-primary-soft">06</span>
+          </div>
+          <h3 class="mt-8 mb-2.5 text-xl font-bold leading-snug">Punya kebutuhan khusus?</h3>
+          <p class="text-primary-soft">
+            Ceritakan pekerjaan yang ingin dipermudah. Kami bantu menyusun solusi yang paling masuk akal.
+          </p>
+          <a href="#kontak"
+             class="mt-5 inline-flex items-center gap-1.5 font-extrabold underline-offset-4 hover:underline">
+            Diskusikan kebutuhan
+            {% include "components/icon.html" with name="arrow-right" class="size-4" %}
+          </a>
+        </article>
+      </div>
+    </div>
+  </section>
+  {# Portofolio #}
+  <section class="bg-dark py-18 text-white md:py-24"
+           id="portofolio"
+           aria-labelledby="portofolio-title">
+    <div class="container-site">
+      {% include "components/section_head.html" with eyebrow="Portofolio" title="Sistem yang dibuat untuk benar-benar digunakan" tone="dark" heading_id="portofolio-title" %}
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {% for item in portfolio_items %}
+          {% include "components/portfolio_card.html" with item=item number=forloop.counter %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {# Proses #}
+  <section class="py-18 md:py-24" id="proses" aria-labelledby="proses-title">
+    <div class="container-site grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-22">
+      {% include "components/section_head.html" with eyebrow="Cara kerja" title="Dari kebutuhan menjadi sistem yang siap dipakai" intro="Proses dibuat sederhana agar keputusan lebih cepat dan hasilnya sesuai dengan aktivitas pengguna." heading_id="proses-title" %}
+      <ol>
+        {% for step in process_steps %}
+          <li class="grid grid-cols-[2.5rem_1fr] gap-4.5 border-b border-line py-6 md:grid-cols-[4rem_1fr]"
+              data-reveal>
+            <span class="text-sm font-extrabold text-primary">0{{ forloop.counter }}</span>
+            <div>
+              <h3 class="text-xl font-bold">{{ step.title }}</h3>
+              <p class="mt-1 text-muted">{{ step.description }}</p>
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </section>
+  {# Kontak #}
+  <section class="pt-9 pb-18 md:pb-24"
+           id="kontak"
+           aria-labelledby="kontak-title">
+    <div class="container-site flex flex-col items-start gap-10 rounded-panel bg-primary px-6 py-8 text-white md:p-14 lg:flex-row lg:items-center lg:justify-between"
+         data-reveal>
+      <div>
+        <p class="mb-3.5 text-eyebrow font-extrabold uppercase text-primary-soft">Mulai dari sini</p>
+        <h2 id="kontak-title" class="text-heading font-extrabold">Apa pekerjaan yang ingin Anda permudah?</h2>
+        <p class="mt-4 text-primary-soft">
+          Ceritakan kebutuhan Anda melalui WhatsApp. Konsultasi awal tidak dipungut biaya.
+        </p>
+      </div>
+      <div class="w-full shrink-0 lg:w-auto">
+        {% include "components/whatsapp_button.html" with text=wa_messages.contact label="Hubungi Sister Creative" variant="light" %}
+      </div>
+    </div>
+  </section>
+{% endblock content %}
+{% block footer %}
+  {% include "components/site_footer.html" %}
+{% endblock footer %}

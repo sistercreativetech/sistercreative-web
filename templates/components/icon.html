@@ -1,0 +1,18 @@
+{% comment %}
+  Ikon Lucide inline.
+  Pakai: {% include "components/icon.html" with name="check" class="size-5" %}
+  Opsional: label="Teks" agar ikon dibacakan pembaca layar (default dekoratif).
+  Daftar ikon: apps/core/icons.py, lalu `python manage.py sync_icons`.
+{% endcomment %}
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="2"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     class="shrink-0 {{ class|default:'size-5' }}"
+     {% if label %}role="img" aria-label="{{ label }}"{% else %}aria-hidden="true"{% endif %}
+     focusable="false">
+  {% include "components/icons/"|add:name|add:".html" %}
+</svg>

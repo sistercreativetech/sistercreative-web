@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+          content="{% block meta_description %}Sister Creative membantu UMKM, sekolah, dan lembaga membangun website, aplikasi, bot, serta automasi kerja.{% endblock meta_description %}">
+    <title>{% block title %}{{ site_name }} — Website & Automasi{% endblock title %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <script src="{% static 'js/boot.js' %}"></script>
+    <script src="{% static 'vendor/motion-14.14.0.js' %}" defer></script>
+    <script src="{% static 'js/app.js' %}" defer></script>
+  </head>
+  <body>
+    <a href="#konten"
+       class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-button focus:bg-white focus:px-4 focus:py-2">Lewati ke konten</a>
+    {% block header %}
+    {% endblock header %}
+    <main id="konten">
+      {% block content %}
+      {% endblock content %}
+    </main>
+    {% block footer %}
+    {% endblock footer %}
+  </body>
+</html>

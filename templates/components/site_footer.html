@@ -1,0 +1,22 @@
+{% url 'core:home' as home_url %}
+<footer class="bg-surface pt-17 pb-7">
+  <div class="container-site flex flex-col justify-between gap-9 md:flex-row">
+    <div>
+      {% include "components/brand.html" %}
+      <p class="mt-4 max-w-md text-muted">Website, aplikasi, dan automasi untuk pekerjaan yang lebih praktis.</p>
+    </div>
+    <nav aria-label="Navigasi footer"
+         class="flex flex-col items-start gap-4 md:flex-row md:items-center md:gap-6">
+      <a href="{{ home_url }}#layanan" class="font-bold hover:text-primary">Layanan</a>
+      <a href="{{ home_url }}#portofolio" class="font-bold hover:text-primary">Portofolio</a>
+      <a href="{{ home_url }}#proses" class="font-bold hover:text-primary">Proses</a>
+      <a href="https://wa.me/{{ contact_whatsapp }}"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="font-bold hover:text-primary">WhatsApp</a>
+    </nav>
+  </div>
+  <div class="container-site mt-10 border-t border-line pt-6 text-sm text-muted">
+    © {% now "Y" %} {{ site_name }}. Seluruh hak dilindungi.
+  </div>
+</footer>
