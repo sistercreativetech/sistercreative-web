@@ -36,6 +36,7 @@ COPY --from=assets --chown=app:app /build/static/vendor ./static/vendor
 RUN DJANGO_SECRET_KEY=build-only POSTGRES_DB=x POSTGRES_USER=x POSTGRES_PASSWORD=x \
     python manage.py collectstatic --noinput \
     && mkdir -p /app/media \
+    && chown app:app /app \
     && chown -R app:app /app/staticfiles /app/media \
     && chmod +x /app/docker/entrypoint.sh
 
