@@ -69,8 +69,8 @@ def get_session(name: str) -> dict | None:
         raise
 
 
-def create_session(name: str, webhook_url: str, webhook_token: str) -> dict:
-    config = {
+def webhook_config(webhook_url: str, webhook_token: str) -> dict:
+    return {
         "webhooks": [
             {
                 "url": webhook_url,
@@ -79,7 +79,17 @@ def create_session(name: str, webhook_url: str, webhook_token: str) -> dict:
             }
         ]
     }
+
+
+def create_session(name: str, webhook_url: str, webhook_token: str) -> dict:
+    config = webhook_config(webhook_url, webhook_token)
     return _json("POST", "/api/sessions", {"name": name, "start": True, "config": config})
+
+
+def update_session_webhooks(name: str, webhook_url: str, webhook_token: str) -> dict:
+    """Ganti webhook sesi yang sudah ada. WAHA menyalakan ulang sesi; login tetap tersimpan."""
+    config = webhook_config(webhook_url, webhook_token)
+    return _json("PUT", f"/api/sessions/{_session_path(name)}", {"name": name, "config": config})
 
 
 def start_session(name: str) -> dict:

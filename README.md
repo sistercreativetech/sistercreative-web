@@ -59,7 +59,7 @@ Contoh lengkap ada di [.env.example](.env.example). Jangan pernah commit `.env`.
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | `https://sistercreative.tech,https://www.sistercreative.tech` |
 | `DJANGO_ADMIN_URL` | Alamat tersembunyi admin bawaan Django, mis. `kelola-a8f3k/` (**jangan** `admin/`, karena path itu dipakai admin NPL lama) |
 | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Database produksi |
-| `SITE_URL` | `https://sistercreative.tech`, dipakai WAHA dan n8n untuk memanggil balik |
+| `SITE_URL` | **Wajib** `https://sistercreative.tech` di produksi, dipakai WAHA dan n8n untuk memanggil balik. Kalau diubah setelah member menghubungkan WhatsApp, jalankan `python manage.py sync_waha_webhooks` |
 | `WAHA_BASE_URL`, `WAHA_API_KEY` | Alamat dan API key server WAHA (versi ≥ 2026.6.1 agar bisa banyak sesi). Di VPS ini: `http://waha:3000` |
 | `WAHA_WEBHOOK_TOKEN` | Token acak buatan sendiri, dikirim WAHA di header `X-SC-Token`. Tentukan sekali sebelum member menghubungkan WhatsApp |
 | `N8N_BASE_URL` | Alamat n8n, untuk proksi admin NPL |

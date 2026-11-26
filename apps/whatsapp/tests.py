@@ -269,3 +269,75 @@ class WebhookTests(TestCase):
             self.url, "bukan json", content_type="application/json", HTTP_X_SC_TOKEN="token-webhook"
         )
         self.assertEqual(response.status_code, 400)
+
+
+@override_settings(**{**WAHA_SETTINGS, "SITE_URL": "https://sistercreative.tech"})
+class SyncWebhooksCommandTests(TestCase):
+    def setUp(self):
+        self.member = make_member()
+        self.session = WhatsAppSession.objects.create(
+            owner=self.member, name=f"member-{self.member.pk}", status="WORKING"
+        )
+        WhatsAppSession.objects.create(
+            owner=make_member("budi@contoh.id"), name="member-baru", status="NOT_CREATED"
+        )
+
+    def run_command(self, *args):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        out = StringIO()
+        call_command("sync_waha_webhooks", *args, stdout=out, stderr=StringIO())
+        return out.getvalue()
+
+    def test_updates_existing_sessions_with_current_url_and_token(self):
+        def fake_get(name):
+            return {"status": "WORKING"} if name == self.session.name else None
+
+        with (
+            mock.patch.object(waha, "get_session", side_effect=fake_get),
+            mock.patch.object(waha, "update_session_webhooks") as update,
+        ):
+            output = self.run_command()
+        update.assert_called_once_with(
+            self.session.name,
+            "https://sistercreative.tech/api/webhooks/waha/",
+            "token-webhook",
+        )
+        self.assertIn("1 diperbarui, 1 dilewati, 0 gagal", output)
+
+    def test_dry_run_changes_nothing(self):
+        with (
+            mock.patch.object(waha, "get_session", return_value={"status": "WORKING"}),
+            mock.patch.object(waha, "update_session_webhooks") as update,
+        ):
+            output = self.run_command("--dry-run")
+        update.assert_not_called()
+        self.assertIn("akan diperbarui", output)
+
+    def test_webhook_config_shape(self):
+        config = waha.webhook_config("https://x.test/hook/", "rahasia")
+        hook = config["webhooks"][0]
+        self.assertEqual(hook["url"], "https://x.test/hook/")
+        self.assertIn("message", hook["events"])
+        self.assertEqual(hook["customHeaders"], [{"name": "X-SC-Token", "value": "rahasia"}])
+
+
+class SiteUrlCheckTests(TestCase):
+    def run_check(self):
+        from apps.core.checks import site_url_is_public
+
+        return site_url_is_public(None)
+
+    @override_settings(SITE_URL="http://127.0.0.1:8000")
+    def test_local_url_warns(self):
+        self.assertEqual(self.run_check()[0].id, "sistercreative.W001")
+
+    @override_settings(SITE_URL="http://sistercreative.tech")
+    def test_plain_http_warns(self):
+        self.assertEqual(len(self.run_check()), 1)
+
+    @override_settings(SITE_URL="https://sistercreative.tech")
+    def test_public_https_ok(self):
+        self.assertEqual(self.run_check(), [])
