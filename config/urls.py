@@ -13,6 +13,7 @@ urlpatterns = [
     path("dashboard/", include("apps.dashboard.urls")),
     path("member/whatsapp/", include("apps.whatsapp.urls")),
     path("member/kampanye/", include("apps.campaigns.urls")),
+    path("member/balas-otomatis/", include("apps.autoreply.urls")),
     path("member/", include("apps.members.urls")),
     # Dipanggil server lain (bukan browser): dilindungi token header, tanpa CSRF.
     path("api/webhooks/waha/", WahaWebhookView.as_view(), name="waha_webhook"),

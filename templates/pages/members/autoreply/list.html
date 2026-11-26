@@ -1,0 +1,110 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Balas otomatis{% endblock page_title %}
+{% block content %}
+  {% url 'autoreply:rule_create' as create_url %}
+  {% include "components/page_header.html" with title="Balas otomatis" intro="Balas pesan masuk secara otomatis berdasarkan kata kunci, dengan tanda dibaca dan jeda mengetik seperti manusia." action_url=create_url action_label="Tambah aturan" %}
+  <div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+    <div class="flex flex-col gap-6">
+      {% if rules %}
+        <ul class="flex flex-col gap-4">
+          {% for rule in rules %}
+            <li class="rounded-card border border-line bg-white p-6">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 class="text-lg font-bold">{{ rule.name }}</h2>
+                  <p class="mt-1 text-sm text-muted">
+                    {{ rule.get_match_type_display }}:
+                    {% for word in rule.keyword_list %}
+                      <span class="ml-1 inline-block rounded-full bg-primary-soft px-2 py-0.5 text-xs font-bold text-primary">{{ word }}</span>
+                    {% endfor %}
+                  </p>
+                </div>
+                {% if rule.is_active %}
+                  {% include "components/status_badge.html" with status="active" label="Aktif" %}
+                {% else %}
+                  {% include "components/status_badge.html" with status="draft" label="Nonaktif" %}
+                {% endif %}
+              </div>
+              <p class="mt-4 line-clamp-3 whitespace-pre-line rounded-button bg-success-soft p-4 text-sm">{{ rule.reply }}</p>
+              <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+                <p class="text-muted">
+                  Urutan {{ rule.priority }} · jeda ulang {{ rule.cooldown_minutes }} menit
+                  {% if rule.active_from %}
+                    · aktif {{ rule.active_from|time:"H.i" }}–{{ rule.active_until|time:"H.i" }}
+                  {% endif %}
+                  · {{ rule.replies_7d }} balasan 7 hari terakhir
+                </p>
+                <div class="flex gap-4 font-bold">
+                  <a href="{% url 'autoreply:rule_update' rule.pk %}"
+                     class="inline-flex items-center gap-1 text-primary hover:underline">
+                    {% include "components/icon.html" with name="pencil" class="size-4" %}
+                    Ubah<span class="sr-only"> {{ rule.name }}</span>
+                  </a>
+                  <a href="{% url 'autoreply:rule_delete' rule.pk %}"
+                     class="inline-flex items-center gap-1 text-danger hover:underline">
+                    {% include "components/icon.html" with name="trash-2" class="size-4" %}
+                    Hapus<span class="sr-only"> {{ rule.name }}</span>
+                  </a>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="rounded-card border border-dashed border-line bg-white px-6 py-12 text-center">
+          <p class="text-lg font-bold">Belum ada aturan</p>
+          <p class="mt-2 text-muted">Contoh: balas otomatis pertanyaan “harga”, “alamat”, atau “jam buka”.</p>
+          <a href="{{ create_url }}"
+             class="mt-6 inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+            {% include "components/icon.html" with name="plus" class="size-4" %}
+            Tambah aturan
+          </a>
+        </div>
+      {% endif %}
+    </div>
+    <aside class="flex flex-col gap-6 self-start">
+      <section class="rounded-card border border-line bg-white p-6"
+               aria-labelledby="test-title">
+        <h2 id="test-title" class="font-bold">Coba pesan</h2>
+        <p class="mt-1 text-sm text-muted">Tidak ada pesan yang dikirim.</p>
+        <form method="get" class="mt-4 flex flex-col gap-4" novalidate>
+          {% include "components/form_field.html" with field=test_form.message %}
+          {% include "components/form_field.html" with field=test_form.name hide_optional=True %}
+          <button type="submit"
+                  class="inline-flex min-h-11 items-center justify-center rounded-button border border-line px-4 font-bold hover:border-primary hover:text-primary">
+            Cek balasan
+          </button>
+        </form>
+        {% if test_result %}
+          <div class="mt-4" role="status">
+            {% if test_result.rule %}
+              <p class="text-sm">
+                Cocok dengan aturan <strong>{{ test_result.rule.name }}</strong>:
+              </p>
+              <p class="mt-2 whitespace-pre-line rounded-button bg-success-soft p-4 text-sm">{{ test_result.reply }}</p>
+            {% else %}
+              <p class="rounded-button bg-surface p-4 text-sm text-muted">
+                Tidak ada aturan aktif yang cocok, jadi pesan ini tidak dibalas otomatis.
+              </p>
+            {% endif %}
+          </div>
+        {% endif %}
+      </section>
+      <section class="rounded-card bg-white p-6 text-sm"
+               aria-labelledby="safety-title">
+        <h2 id="safety-title" class="font-bold">Cara kerja yang aman</h2>
+        <ul class="mt-3 flex list-disc flex-col gap-1.5 pl-5 text-muted">
+          <li>Pesan ditandai dibaca, jeda sebentar, lalu muncul “sedang mengetik…” sebelum balasan terkirim.</li>
+          <li>Satu aturan tidak membalas chat yang sama berulang selama jeda ulang.</li>
+          <li>Maksimal {{ autoreply_limit }} balasan otomatis per jam. Terpakai satu jam terakhir: {{ hourly_used }}.</li>
+          <li>Grup WhatsApp dan kontak yang sudah berhenti berlangganan tidak dibalas.</li>
+        </ul>
+        <a href="{% url 'autoreply:log_list' %}"
+           class="mt-4 inline-flex items-center gap-1.5 font-bold text-primary underline underline-offset-4">
+          {% include "components/icon.html" with name="history" class="size-4" %}
+          Lihat riwayat balasan
+        </a>
+      </section>
+    </aside>
+  </div>
+{% endblock content %}

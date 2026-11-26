@@ -112,10 +112,13 @@ def handle_event(event: dict) -> str:
         if payload.get("fromMe"):
             return "ignored"
         sender = payload.get("from") or ""
-        if not sender.endswith("@c.us"):
-            return "ignored"
         text = (payload.get("body") or "").strip().upper()
         if text not in STOP_KEYWORDS:
+            # Bukan STOP: serahkan ke balas otomatis (impor lokal untuk hindari impor melingkar).
+            from apps.autoreply.services import handle_incoming
+
+            return handle_incoming(session, payload)
+        if not sender.endswith("@c.us"):
             return "ignored"
         phone = sender.split("@")[0]
         updated = Contact.objects.filter(

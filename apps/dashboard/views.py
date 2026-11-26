@@ -10,6 +10,7 @@ from django_filters.views import FilterView
 
 from apps.accounts import services as account_services
 from apps.accounts.mixins import StaffRequiredMixin
+from apps.autoreply.selectors import replies_last_24h
 from apps.campaigns import selectors as campaign_selectors
 from apps.campaigns import services as campaign_services
 from apps.campaigns.models import Campaign
@@ -86,6 +87,11 @@ class MemberDetailView(DashboardMixin, SuccessMessageMixin, UpdateView):
 
     def get_success_message(self, cleaned_data):
         return self.success_message % {"full_name": self.object.full_name}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["autoreplies_24h"] = replies_last_24h(self.object)
+        return context
 
 
 class MemberStatusView(StaffRequiredMixin, View):

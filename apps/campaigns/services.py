@@ -1,9 +1,6 @@
 """Logika kampanye: penerima, kuota, kirim ke n8n, dan status dari n8n."""
 
-import json
 import logging
-import urllib.error
-import urllib.request
 from datetime import datetime, time
 
 from django.conf import settings
@@ -14,6 +11,7 @@ from django.utils import timezone
 
 from apps.contacts.messages import render_message
 from apps.contacts.models import Contact
+from apps.core import n8n
 from apps.whatsapp import services as wa_services
 from apps.whatsapp import waha
 from apps.whatsapp.models import WhatsAppSession
@@ -108,21 +106,11 @@ def create_campaign(owner, *, name, body, all_contacts, groups, wa_groups) -> Ca
 
 
 def _post_to_n8n(payload: dict) -> None:
-    url = settings.N8N_BLAST_WEBHOOK_URL
-    if not url or not settings.N8N_BLAST_TOKEN:
-        raise CampaignError("Layanan pengiriman belum dikonfigurasi. Hubungi admin.")
-    request = urllib.request.Request(  # noqa: S310 (URL dari .env)
-        url,
-        data=json.dumps(payload).encode(),
-        method="POST",
-        headers={"Content-Type": "application/json", "X-SC-Token": settings.N8N_BLAST_TOKEN},
-    )
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:  # noqa: S310
-            if response.status >= 300:
-                raise CampaignError("Layanan pengiriman menolak permintaan.")
-    except (urllib.error.URLError, TimeoutError) as exc:
-        logger.warning("Gagal mengirim kampanye ke n8n: %s", exc)
+        n8n.post_job(settings.N8N_BLAST_WEBHOOK_URL, payload)
+    except n8n.N8nNotConfigured as exc:
+        raise CampaignError("Layanan pengiriman belum dikonfigurasi. Hubungi admin.") from exc
+    except n8n.N8nError as exc:
         raise CampaignError("Layanan pengiriman sedang tidak bisa dihubungi. Coba lagi.") from exc
 
 

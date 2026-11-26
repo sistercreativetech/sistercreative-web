@@ -4,7 +4,7 @@ Website, portofolio, dan aplikasi kirim pesan WhatsApp untuk **sistercreative.te
 
 - **Publik:** landing page, portofolio (`/portofolio/`), konsultasi via WhatsApp.
 - **Admin** (`/dashboard/`): menyetujui member, mengatur kuota pesan, mengelola portofolio dan kategori, memantau dan menghentikan kampanye.
-- **Member** (`/member/`): menghubungkan WhatsApp (scan QR), mengelola kontak/grup/template, dan mengirim kampanye ke kontak maupun grup WhatsApp.
+- **Member** (`/member/`): menghubungkan WhatsApp (scan QR), mengelola kontak/grup/template, mengirim kampanye ke kontak maupun grup WhatsApp, dan **balas otomatis** berdasarkan kata kunci (tanda dibaca + jeda mengetik).
 - **Admin NPL lama** (`/admin`, `/admin/api`): diproksikan ke webhook n8n, dengan path yang sama seperti Cloudflare Worker lama.
 
 Stack: Django 5.2, PostgreSQL, Tailwind CSS v4, django-allauth, WAHA Plus (WhatsApp), n8n.
@@ -65,6 +65,8 @@ Contoh lengkap ada di [.env.example](.env.example). Jangan pernah commit `.env`.
 | `N8N_BASE_URL` | Alamat n8n, untuk proksi admin NPL |
 | `N8N_BLAST_WEBHOOK_URL` | Production URL webhook workflow "Sister Creative - Blast WA Member (WAHA)" |
 | `N8N_BLAST_TOKEN`, `N8N_CALLBACK_TOKEN` | Dua token acak, harus sama dengan credential di workflow n8n |
+| `N8N_AUTOREPLY_WEBHOOK_URL` | Production URL webhook workflow "Sister Creative - Balas Otomatis (WAHA)" |
+| `AUTO_REPLY_MAX_PER_HOUR` | Batas balasan otomatis per member per jam, bawaan 30 (tidak memotong kuota blast) |
 | `BLAST_DELAY_MIN`, `BLAST_DELAY_MAX` | Jeda acak antar-pesan (detik), bawaan 8–20 |
 | `DEFAULT_DAILY_MESSAGE_QUOTA` | Kuota awal per member per hari, bawaan 100 |
 | `EMAIL_*`, `DEFAULT_FROM_EMAIL` | SMTP untuk email reset kata sandi |
@@ -150,7 +152,10 @@ docker compose -f docker-compose.prod.yml --env-file .env exec web python manage
    - node *Terima Kampanye dari Django*: credential **Header Auth**, nama `X-SC-Token`, nilai = `N8N_BLAST_TOKEN`;
    - node *Laporkan Hasil ke Django*: credential **Custom Auth** `{"headers":{"X-SC-Token":"<N8N_CALLBACK_TOKEN>"}}`;
    - salin **Production URL** webhook ke `N8N_BLAST_WEBHOOK_URL`, lalu **aktifkan** workflow.
-3. Muat ulang website: `docker compose -f docker-compose.prod.yml --env-file .env up -d`.
+3. Buka workflow **"Sister Creative - Balas Otomatis (WAHA)"**:
+   - node *Terima Balasan dari Django*: pilih credential Header Auth **yang sama** dengan workflow Blast (`X-SC-Token` = `N8N_BLAST_TOKEN`);
+   - salin **Production URL** webhook ke `N8N_AUTOREPLY_WEBHOOK_URL`, lalu **aktifkan** workflow.
+4. Muat ulang website: `docker compose -f docker-compose.prod.yml --env-file .env up -d`.
 
 ### 7. Checklist setelah deploy
 
@@ -163,6 +168,7 @@ docker compose -f docker-compose.prod.yml --env-file .env exec web python manage
 - [ ] Member: menu WhatsApp → QR muncul → scan → status "Terhubung"
 - [ ] Kampanye uji ke 1–2 nomor sendiri → status "Terkirim" di detail kampanye
 - [ ] Balas **STOP** dari nomor uji → kontak berubah menjadi "Berhenti"
+- [ ] Buat aturan balas otomatis, kirim kata kuncinya dari nomor lain → pesan ditandai dibaca, muncul "mengetik…", lalu balasan masuk
 - [ ] Reset kata sandi mengirim email (bila SMTP sudah diisi)
 
 ### Pembaruan
@@ -206,4 +212,5 @@ docker compose -f docker-compose.prod.yml --env-file .env logs -f web
 | Form gagal "CSRF verification failed" | `DJANGO_CSRF_TRUSTED_ORIGINS` belum diisi `https://...` |
 | QR tidak muncul | `WAHA_BASE_URL`/`WAHA_API_KEY` salah, atau WAHA tidak bisa dihubungi dari container |
 | Kampanye "Layanan pengiriman belum dikonfigurasi" | `N8N_BLAST_WEBHOOK_URL`/`N8N_BLAST_TOKEN` kosong |
+| Balas otomatis tidak jalan | Workflow Balas Otomatis belum aktif, `N8N_AUTOREPLY_WEBHOOK_URL` kosong, atau cek status di Riwayat balas otomatis |
 | Status penerima tetap "Menunggu" | Workflow n8n belum aktif, atau token callback beda dengan `N8N_CALLBACK_TOKEN` |

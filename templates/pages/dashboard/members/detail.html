@@ -41,6 +41,12 @@
           </dd>
         </div>
         <div>
+          <dt class="text-muted">Balas otomatis 24 jam terakhir</dt>
+          <dd class="font-semibold">
+            {{ autoreplies_24h }}
+          </dd>
+        </div>
+        <div>
           <dt class="text-muted">Login terakhir</dt>
           <dd class="font-semibold">
             {{ member.last_login|date:"j F Y, H:i"|default:"Belum pernah" }}

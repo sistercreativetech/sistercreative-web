@@ -1,0 +1,48 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Riwayat balas otomatis{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'autoreply:rule_list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Balas otomatis
+  </a>
+  {% include "components/page_header.html" with title="Riwayat balas otomatis" intro="Pesan masuk yang dibalas otomatis, terbaru di atas." %}
+  {% if logs %}
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[44rem] text-left text-sm">
+        <caption class="sr-only">Riwayat balas otomatis</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Waktu</th>
+            <th scope="col" class="px-5 py-3">Dari</th>
+            <th scope="col" class="px-5 py-3">Pesan masuk</th>
+            <th scope="col" class="px-5 py-3">Aturan</th>
+            <th scope="col" class="px-5 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for log in logs %}
+            <tr>
+              <td class="px-5 py-3 whitespace-nowrap text-muted">{{ log.created_at|date:"j M, H:i" }}</td>
+              <td class="px-5 py-3 tabular-nums">{{ log.chat_id|cut:"@c.us" }}</td>
+              <td class="px-5 py-3">{{ log.incoming_text|truncatechars:80 }}</td>
+              <td class="px-5 py-3">{{ log.rule.name|default:"(dihapus)" }}</td>
+              <td class="px-5 py-3">
+                {% if log.status == "queued" %}
+                  {% include "components/status_badge.html" with status="active" label=log.get_status_display %}
+                {% else %}
+                  {% include "components/status_badge.html" with status="rejected" label=log.get_status_display %}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj %}
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      Belum ada pesan yang dibalas otomatis.
+    </p>
+  {% endif %}
+{% endblock content %}

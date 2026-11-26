@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "apps.contacts",
     "apps.whatsapp",
     "apps.campaigns",
+    "apps.autoreply",
     "apps.members",
     "apps.dashboard",
 ]
@@ -159,6 +160,9 @@ N8N_BASE_URL = env("N8N_BASE_URL", "")
 N8N_BLAST_WEBHOOK_URL = env("N8N_BLAST_WEBHOOK_URL", "")
 N8N_BLAST_TOKEN = env("N8N_BLAST_TOKEN", "")
 N8N_CALLBACK_TOKEN = env("N8N_CALLBACK_TOKEN", "")
+N8N_AUTOREPLY_WEBHOOK_URL = env("N8N_AUTOREPLY_WEBHOOK_URL", "")
+# Batas balasan otomatis per member per jam (tidak memotong kuota blast).
+AUTO_REPLY_MAX_PER_HOUR = int(env("AUTO_REPLY_MAX_PER_HOUR", "30"))
 # Jeda acak antar-pesan (detik) untuk mengurangi risiko nomor diblokir.
 BLAST_DELAY_MIN = int(env("BLAST_DELAY_MIN", "8"))
 BLAST_DELAY_MAX = int(env("BLAST_DELAY_MAX", "20"))
