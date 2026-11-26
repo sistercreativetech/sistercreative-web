@@ -11,12 +11,16 @@
   <dl class="mt-6 rounded-card bg-surface p-5 text-sm">
     <div class="flex justify-between gap-4">
       <dt class="text-muted">Email</dt>
-      <dd class="font-semibold">{{ user.email }}</dd>
+      <dd class="font-semibold">
+        {{ user.email }}
+      </dd>
     </div>
     {% if user.whatsapp_number %}
       <div class="mt-2 flex justify-between gap-4">
         <dt class="text-muted">WhatsApp</dt>
-        <dd class="font-semibold">+{{ user.whatsapp_number }}</dd>
+        <dd class="font-semibold">
+          +{{ user.whatsapp_number }}
+        </dd>
       </div>
     {% endif %}
   </dl>

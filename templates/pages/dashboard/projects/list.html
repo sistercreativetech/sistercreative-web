@@ -1,0 +1,104 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Portofolio{% endblock page_title %}
+{% block content %}
+  {% url 'dashboard:project_create' as create_url %}
+  {% include "components/page_header.html" with title="Portofolio" intro="Proyek yang terbit tampil di halaman publik; tandai “tampil di beranda” untuk proyek pilihan." action_url=create_url action_label="Tambah proyek" %}
+  <form method="get"
+        role="search"
+        aria-label="Saring proyek"
+        class="grid gap-4 rounded-card border border-line bg-white p-5 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end">
+    {% include "components/form_field.html" with field=filter.form.q hide_optional=True %}
+    {% include "components/form_field.html" with field=filter.form.is_published hide_optional=True %}
+    {% include "components/form_field.html" with field=filter.form.category hide_optional=True %}
+    <div class="flex gap-2">
+      <button type="submit"
+              class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark md:flex-none">
+        {% include "components/icon.html" with name="search" class="size-4" %}
+        Terapkan
+      </button>
+      {% if is_filtered %}
+        <a href="{% url 'dashboard:project_list' %}"
+           class="inline-flex min-h-12 items-center rounded-button border border-line px-4 font-bold hover:border-primary hover:text-primary">Reset</a>
+      {% endif %}
+    </div>
+  </form>
+  <p class="mt-6 mb-3 text-sm font-semibold text-muted">{{ paginator.count|default:0 }} proyek</p>
+  {% if projects %}
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[44rem] text-left text-sm">
+        <caption class="sr-only">Daftar proyek portofolio</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Proyek</th>
+            <th scope="col" class="px-5 py-3">Kategori</th>
+            <th scope="col" class="px-5 py-3">Status</th>
+            <th scope="col" class="px-5 py-3">Urutan</th>
+            <th scope="col" class="px-5 py-3">
+              <span class="sr-only">Aksi</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for project in projects %}
+            <tr>
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  {% if project.cover_image %}
+                    <img src="{{ project.cover_image.url }}"
+                         alt=""
+                         width="64"
+                         height="36"
+                         loading="lazy"
+                         class="aspect-video w-16 shrink-0 rounded-md object-cover">
+                  {% endif %}
+                  <div>
+                    <a href="{% url 'dashboard:project_update' project.pk %}"
+                       class="font-bold hover:text-primary">{{ project.title }}</a>
+                    <div class="text-muted">{{ project.updated_at|date:"j M Y" }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-5 py-4">{{ project.category.name }}</td>
+              <td class="px-5 py-4">
+                <div class="flex flex-wrap gap-1.5">
+                  {% if project.is_published %}
+                    {% include "components/status_badge.html" with status="active" label="Terbit" %}
+                  {% else %}
+                    {% include "components/status_badge.html" with status="draft" label="Draf" %}
+                  {% endif %}
+                  {% if project.is_featured %}
+                    <span class="inline-flex items-center rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">Beranda</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td class="px-5 py-4">{{ project.order }}</td>
+              <td class="px-5 py-4">
+                <div class="flex justify-end gap-3 font-bold">
+                  {% if project.is_published %}
+                    <a href="{{ project.get_absolute_url }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="inline-flex items-center gap-1 text-muted hover:text-primary">
+                      {% include "components/icon.html" with name="eye" class="size-4" %}
+                      Lihat<span class="sr-only"> {{ project.title }} (tab baru)</span>
+                    </a>
+                  {% endif %}
+                  <a href="{% url 'dashboard:project_update' project.pk %}"
+                     class="inline-flex items-center gap-1 text-primary hover:underline">
+                    {% include "components/icon.html" with name="pencil" class="size-4" %}
+                    Ubah<span class="sr-only"> {{ project.title }}</span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj querystring=filter_querystring %}
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      Belum ada proyek. <a href="{{ create_url }}" class="font-bold text-primary underline">Tambah proyek pertama</a>.
+    </p>
+  {% endif %}
+{% endblock content %}

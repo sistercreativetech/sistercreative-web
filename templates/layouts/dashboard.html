@@ -2,6 +2,12 @@
 {% block title %}{% block page_title %}Dashboard{% endblock page_title %} — Admin {{ site_name }}{% endblock title %}
 {% block app_label %}Admin{% endblock app_label %}
 {% block app_nav %}
-  {% url 'dashboard:home' as dashboard_home %}
-  {% include "components/app_nav_link.html" with url=dashboard_home label="Ringkasan" icon="layout-dashboard" active=True %}
+  {% url 'dashboard:home' as home_url %}
+  {% url 'dashboard:member_list' as member_url %}
+  {% url 'dashboard:project_list' as project_url %}
+  {% url 'dashboard:category_list' as category_url %}
+  {% include "components/app_nav_link.html" with url=home_url label="Ringkasan" icon="layout-dashboard" section="home" current=dashboard_section %}
+  {% include "components/app_nav_link.html" with url=member_url label="Member" icon="users" section="members" current=dashboard_section badge=pending_count badge_label="menunggu persetujuan" %}
+  {% include "components/app_nav_link.html" with url=project_url label="Portofolio" icon="folder-kanban" section="projects" current=dashboard_section %}
+  {% include "components/app_nav_link.html" with url=category_url label="Kategori" icon="tags" section="categories" current=dashboard_section %}
 {% endblock app_nav %}

@@ -1,0 +1,81 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Member{% endblock page_title %}
+{% block content %}
+  {% include "components/page_header.html" with title="Member" intro="Setujui pendaftaran, atur kuota pesan, dan nonaktifkan akun bila perlu." %}
+  <form method="get"
+        role="search"
+        aria-label="Saring member"
+        class="grid gap-4 rounded-card border border-line bg-white p-5 md:grid-cols-[2fr_1fr_auto] md:items-end">
+    {% include "components/form_field.html" with field=filter.form.q hide_optional=True %}
+    {% include "components/form_field.html" with field=filter.form.status hide_optional=True %}
+    <div class="flex gap-2">
+      <button type="submit"
+              class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark md:flex-none">
+        {% include "components/icon.html" with name="search" class="size-4" %}
+        Terapkan
+      </button>
+      {% if is_filtered %}
+        <a href="{% url 'dashboard:member_list' %}"
+           class="inline-flex min-h-12 items-center rounded-button border border-line px-4 font-bold hover:border-primary hover:text-primary">Reset</a>
+      {% endif %}
+    </div>
+  </form>
+  <p class="mt-6 mb-3 text-sm font-semibold text-muted">{{ paginator.count|default:0 }} member</p>
+  {% if members %}
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[44rem] text-left text-sm">
+        <caption class="sr-only">Daftar member</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Nama</th>
+            <th scope="col" class="px-5 py-3">WhatsApp</th>
+            <th scope="col" class="px-5 py-3">Status</th>
+            <th scope="col" class="px-5 py-3">Kuota/hari</th>
+            <th scope="col" class="px-5 py-3">Terdaftar</th>
+            <th scope="col" class="px-5 py-3">
+              <span class="sr-only">Aksi</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for member in members %}
+            <tr>
+              <td class="px-5 py-4">
+                <a href="{% url 'dashboard:member_detail' member.pk %}"
+                   class="font-bold hover:text-primary">{{ member.full_name }}</a>
+                <div class="text-muted">{{ member.email }}</div>
+              </td>
+              <td class="px-5 py-4">
+                {% if member.whatsapp_number %}
+                  +{{ member.whatsapp_number }}
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td class="px-5 py-4">
+                {% include "components/status_badge.html" with status=member.status label=member.get_status_display %}
+              </td>
+              <td class="px-5 py-4">{{ member.daily_message_quota }}</td>
+              <td class="px-5 py-4 text-muted">{{ member.date_joined|date:"j M Y" }}</td>
+              <td class="px-5 py-4 text-right">
+                {% if member.status == "pending" %}
+                  <div class="flex justify-end gap-2">
+                    {% include "components/member_status_button.html" with member=member status="active" label="Setujui" icon="user-check" variant="primary" next="list" %}
+                  </div>
+                {% else %}
+                  <a href="{% url 'dashboard:member_detail' member.pk %}"
+                     class="font-bold text-primary underline underline-offset-4">Kelola<span class="sr-only"> {{ member.full_name }}</span></a>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj querystring=filter_querystring %}
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      Belum ada member yang cocok.
+    </p>
+  {% endif %}
+{% endblock content %}

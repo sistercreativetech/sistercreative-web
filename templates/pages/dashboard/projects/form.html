@@ -1,0 +1,89 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}
+  {% if object %}
+    Ubah {{ object.title }}
+  {% else %}
+    Tambah proyek
+  {% endif %}
+{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'dashboard:project_list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Semua proyek
+  </a>
+  <h1 class="mb-8 text-3xl font-extrabold">
+    {% if object %}
+      Ubah proyek
+    {% else %}
+      Tambah proyek
+    {% endif %}
+  </h1>
+  <form method="post"
+        enctype="multipart/form-data"
+        class="grid gap-6 lg:grid-cols-[1fr_22rem]"
+        novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="rounded-button border border-danger/30 bg-danger-soft px-4 py-3 text-sm font-semibold text-danger lg:col-span-2"
+           role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+    <div class="flex flex-col gap-6">
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="content-title">
+        <h2 id="content-title" class="text-lg font-bold">Konten</h2>
+        {% include "components/form_field.html" with field=form.title %}
+        {% include "components/form_field.html" with field=form.summary %}
+        {% include "components/form_field.html" with field=form.description %}
+        <div class="grid gap-5 sm:grid-cols-2">
+          {% include "components/form_field.html" with field=form.client_name %}
+          {% include "components/form_field.html" with field=form.year %}
+        </div>
+        {% include "components/form_field.html" with field=form.project_url %}
+      </section>
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="image-title">
+        <h2 id="image-title" class="text-lg font-bold">Gambar sampul</h2>
+        {% if object.cover_image %}
+          <img src="{{ object.cover_image.url }}"
+               alt="{{ object.cover_alt }}"
+               width="640"
+               height="360"
+               class="aspect-video w-full max-w-md rounded-card object-cover">
+        {% endif %}
+        {% include "components/form_field.html" with field=form.cover_image %}
+        {% include "components/form_field.html" with field=form.cover_alt %}
+      </section>
+    </div>
+    <div class="flex flex-col gap-6">
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="publish-title">
+        <h2 id="publish-title" class="text-lg font-bold">Publikasi</h2>
+        {% include "components/form_field.html" with field=form.is_published %}
+        {% include "components/form_field.html" with field=form.is_featured %}
+        {% include "components/form_field.html" with field=form.order %}
+        <button type="submit"
+                class="inline-flex min-h-13 items-center justify-center rounded-button bg-primary px-6 font-extrabold text-white shadow-primary hover:bg-primary-dark">
+          Simpan proyek
+        </button>
+      </section>
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="meta-title">
+        <h2 id="meta-title" class="text-lg font-bold">Kategori & teknologi</h2>
+        {% include "components/form_field.html" with field=form.category %}
+        {% include "components/form_field.html" with field=form.tags_text %}
+        <a href="{% url 'dashboard:category_create' %}"
+           class="text-sm font-bold text-primary underline underline-offset-4">Tambah kategori baru</a>
+      </section>
+      {% if object %}
+        <a href="{% url 'dashboard:project_delete' object.pk %}"
+           class="inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-danger/40 bg-white px-5 font-bold text-danger hover:bg-danger-soft">
+          {% include "components/icon.html" with name="trash-2" class="size-4" %}
+          Hapus proyek
+        </a>
+      {% endif %}
+    </div>
+  </form>
+{% endblock content %}

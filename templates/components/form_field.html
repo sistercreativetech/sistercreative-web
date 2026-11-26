@@ -20,7 +20,8 @@
            class="text-sm text-muted [&_li]:ml-4 [&_li]:list-disc">{{ field.help_text }}</div>
     {% endif %}
     {% if field.errors %}
-      <div id="{{ field.auto_id }}_error" class="text-sm font-semibold text-danger">
+      <div id="{{ field.auto_id }}_error"
+           class="text-sm font-semibold text-danger">
         {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
       </div>
     {% endif %}

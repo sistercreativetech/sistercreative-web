@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.validators import MaxValueValidator
 from django.db import models
 
 
@@ -52,6 +54,12 @@ class User(AbstractUser):
     )
     status = models.CharField(
         "status", max_length=12, choices=Status.choices, default=Status.PENDING, db_index=True
+    )
+    daily_message_quota = models.PositiveIntegerField(
+        "kuota pesan per hari",
+        default=settings.DEFAULT_DAILY_MESSAGE_QUOTA,
+        validators=[MaxValueValidator(5000)],
+        help_text="Batas pesan WhatsApp yang boleh dikirim member dalam sehari.",
     )
     status_changed_at = models.DateTimeField("status diubah", null=True, blank=True)
     status_changed_by = models.ForeignKey(

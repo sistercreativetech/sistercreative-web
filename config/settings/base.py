@@ -138,6 +138,9 @@ ACCOUNT_LOGOUT_ON_GET = False
 ACCOUNT_SESSION_REMEMBER = None
 ACCOUNT_PREVENT_ENUMERATION = True
 
+# Kuota awal pesan WhatsApp per member per hari (bisa diubah admin per member).
+DEFAULT_DAILY_MESSAGE_QUOTA = int(env("DEFAULT_DAILY_MESSAGE_QUOTA", "100"))
+
 # --- Email ------------------------------------------------------------------
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = env("EMAIL_HOST", "")

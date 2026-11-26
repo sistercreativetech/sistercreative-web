@@ -7,8 +7,6 @@
   {% slot body %}
   {% endslot %}
   {% if slots.actions %}
-    <div class="mt-4 flex flex-col gap-3">
-      {% for action in slots.actions %}{{ action }}{% endfor %}
-    </div>
+    <div class="mt-4 flex flex-col gap-3">{% for action in slots.actions %}{{ action }}{% endfor %}</div>
   {% endif %}
 </section>

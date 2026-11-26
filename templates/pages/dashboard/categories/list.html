@@ -1,0 +1,50 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Kategori{% endblock page_title %}
+{% block content %}
+  {% url 'dashboard:category_create' as create_url %}
+  {% include "components/page_header.html" with title="Kategori" intro="Kategori dipakai untuk mengelompokkan dan menyaring portofolio." action_url=create_url action_label="Tambah kategori" %}
+  {% if categories %}
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[32rem] text-left text-sm">
+        <caption class="sr-only">Daftar kategori</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Nama</th>
+            <th scope="col" class="px-5 py-3">Jumlah proyek</th>
+            <th scope="col" class="px-5 py-3">Urutan</th>
+            <th scope="col" class="px-5 py-3">
+              <span class="sr-only">Aksi</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for category in categories %}
+            <tr>
+              <td class="px-5 py-4 font-bold">{{ category.name }}</td>
+              <td class="px-5 py-4">{{ category.project_count }}</td>
+              <td class="px-5 py-4">{{ category.order }}</td>
+              <td class="px-5 py-4">
+                <div class="flex justify-end gap-4 font-bold">
+                  <a href="{% url 'dashboard:category_update' category.pk %}"
+                     class="inline-flex items-center gap-1 text-primary hover:underline">
+                    {% include "components/icon.html" with name="pencil" class="size-4" %}
+                    Ubah<span class="sr-only"> {{ category.name }}</span>
+                  </a>
+                  {% if not category.project_count %}
+                    <a href="{% url 'dashboard:category_delete' category.pk %}"
+                       class="inline-flex items-center gap-1 text-danger hover:underline">
+                      {% include "components/icon.html" with name="trash-2" class="size-4" %}
+                      Hapus<span class="sr-only"> {{ category.name }}</span>
+                    </a>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">Belum ada kategori.</p>
+  {% endif %}
+{% endblock content %}
