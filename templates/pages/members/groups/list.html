@@ -1,0 +1,43 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Grup{% endblock page_title %}
+{% block content %}
+  {% url 'members:group_create' as create_url %}
+  {% include "components/page_header.html" with title="Grup kontak" intro="Kelompokkan kontak agar pesan sampai ke orang yang tepat." action_url=create_url action_label="Buat grup" %}
+  {% if groups %}
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {% for group in groups %}
+        <article class="flex flex-col rounded-card border border-line bg-white p-6">
+          <h2 class="text-lg font-bold">{{ group.name }}</h2>
+          {% if group.description %}<p class="mt-1 text-sm text-muted">{{ group.description }}</p>{% endif %}
+          <p class="mt-4 text-sm">
+            <strong>{{ group.contact_count }}</strong> kontak
+            {% if group.contact_count != group.active_count %}
+              <span class="text-muted">· {{ group.active_count }} bisa dikirimi</span>
+            {% endif %}
+          </p>
+          <div class="mt-auto flex flex-wrap gap-4 pt-5 text-sm font-bold">
+            <a href="{% url 'members:contact_list' %}?group={{ group.pk }}"
+               class="inline-flex items-center gap-1 text-primary hover:underline">
+              {% include "components/icon.html" with name="users" class="size-4" %}
+              Lihat kontak<span class="sr-only"> {{ group.name }}</span>
+            </a>
+            <a href="{% url 'members:group_update' group.pk %}"
+               class="inline-flex items-center gap-1 text-muted hover:text-primary">
+              {% include "components/icon.html" with name="pencil" class="size-4" %}
+              Ubah<span class="sr-only"> {{ group.name }}</span>
+            </a>
+            <a href="{% url 'members:group_delete' group.pk %}"
+               class="inline-flex items-center gap-1 text-danger hover:underline">
+              {% include "components/icon.html" with name="trash-2" class="size-4" %}
+              Hapus<span class="sr-only"> {{ group.name }}</span>
+            </a>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      Belum ada grup. Grup juga bisa dibuat otomatis saat mengimpor kontak.
+    </p>
+  {% endif %}
+{% endblock content %}

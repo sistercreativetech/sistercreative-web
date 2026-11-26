@@ -1,0 +1,14 @@
+{% comment %}
+  Kepala section: eyebrow + h2 + pengantar opsional.
+  Pakai: {% include "components/section_head.html" with eyebrow="..." title="..." intro="..." tone="dark" heading_id="..." %}
+{% endcomment %}
+<div class="mb-10 max-w-2xl md:mb-12" data-reveal>
+  <p class="mb-3.5 text-eyebrow font-extrabold uppercase {% if tone == 'dark' %}text-primary-light{% else %}text-primary{% endif %}">
+    {{ eyebrow }}
+  </p>
+  <h2 {% if heading_id %}id="{{ heading_id }}"{% endif %}
+      class="text-heading font-extrabold">{{ title }}</h2>
+  {% if intro %}
+    <p class="mt-4.5 {% if tone == 'dark' %}text-on-dark-muted{% else %}text-muted{% endif %}">{{ intro }}</p>
+  {% endif %}
+</div>

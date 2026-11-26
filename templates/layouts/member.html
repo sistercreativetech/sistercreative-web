@@ -1,0 +1,19 @@
+{% extends "layouts/app.html" %}
+{% block title %}{% block page_title %}Area member{% endblock page_title %} — {{ site_name }}{% endblock title %}
+{% block app_label %}Member{% endblock app_label %}
+{% block app_nav %}
+  {% url 'members:home' as home_url %}
+  {% url 'campaigns:list' as campaign_url %}
+  {% url 'members:contact_list' as contact_url %}
+  {% url 'members:group_list' as group_url %}
+  {% url 'members:template_list' as template_url %}
+  {% url 'autoreply:rule_list' as autoreply_url %}
+  {% url 'whatsapp:session' as whatsapp_url %}
+  {% include "components/app_nav_link.html" with url=home_url label="Beranda" icon="layout-dashboard" section="home" current=member_section %}
+  {% include "components/app_nav_link.html" with url=campaign_url label="Kirim pesan" icon="send" section="campaigns" current=member_section %}
+  {% include "components/app_nav_link.html" with url=contact_url label="Kontak" icon="users" section="contacts" current=member_section %}
+  {% include "components/app_nav_link.html" with url=group_url label="Grup" icon="tags" section="groups" current=member_section %}
+  {% include "components/app_nav_link.html" with url=template_url label="Template pesan" icon="file-text" section="templates" current=member_section %}
+  {% include "components/app_nav_link.html" with url=autoreply_url label="Balas otomatis" icon="message-square-reply" section="autoreply" current=member_section %}
+  {% include "components/app_nav_link.html" with url=whatsapp_url label="WhatsApp" icon="smartphone" section="whatsapp" current=member_section %}
+{% endblock app_nav %}

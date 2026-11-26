@@ -1,0 +1,5 @@
+{% comment %}
+  Badge status member.
+  Pakai: {% include "components/status_badge.html" with status=member.status label=member.get_status_display %}
+{% endcomment %}
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold {% if status == 'active' %}bg-success-soft text-success{% elif status == 'pending' %}bg-warning-soft text-warning{% elif status == 'rejected' or status == 'suspended' %}bg-danger-soft text-danger{% else %}bg-surface text-muted{% endif %}">{{ label }}</span>

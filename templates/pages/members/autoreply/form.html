@@ -1,0 +1,65 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}
+  {% if object %}
+    Ubah aturan
+  {% else %}
+    Tambah aturan
+  {% endif %}
+{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'autoreply:rule_list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Semua aturan
+  </a>
+  <h1 class="mb-8 text-3xl font-extrabold">
+    {% if object %}
+      Ubah aturan balas otomatis
+    {% else %}
+      Tambah aturan balas otomatis
+    {% endif %}
+  </h1>
+  <form method="post" class="grid gap-6 lg:grid-cols-[1fr_22rem]" novalidate>
+    {% csrf_token %}
+    <div class="flex flex-col gap-6">
+      {% include "components/form_non_field_errors.html" %}
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="trigger-title">
+        <h2 id="trigger-title" class="text-lg font-bold">Pemicu</h2>
+        {% include "components/form_field.html" with field=form.name %}
+        {% include "components/form_field.html" with field=form.keywords %}
+        {% include "components/form_field.html" with field=form.match_type %}
+        <p class="-mt-3 text-sm text-muted">
+          “Mengandung kata” cocok bila kata kunci muncul utuh di pesan. Huruf besar/kecil dan tanda baca diabaikan.
+        </p>
+      </section>
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="reply-title">
+        <h2 id="reply-title" class="text-lg font-bold">Balasan</h2>
+        {% include "components/form_field.html" with field=form.reply %}
+      </section>
+    </div>
+    <div class="flex flex-col gap-6">
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="setting-title">
+        <h2 id="setting-title" class="text-lg font-bold">Pengaturan</h2>
+        {% include "components/form_field.html" with field=form.is_active %}
+        {% include "components/form_field.html" with field=form.priority %}
+        {% include "components/form_field.html" with field=form.cooldown_minutes %}
+        <fieldset class="flex flex-col gap-3">
+          <legend class="mb-1 text-sm font-bold">
+            Jam aktif <span class="font-normal text-muted">(opsional, WITA)</span>
+          </legend>
+          <div class="grid grid-cols-2 gap-3">
+            {% include "components/form_field.html" with field=form.active_from hide_optional=True %}
+            {% include "components/form_field.html" with field=form.active_until hide_optional=True %}
+          </div>
+        </fieldset>
+        <button type="submit"
+                class="inline-flex min-h-12 items-center justify-center rounded-button bg-primary px-5 font-extrabold text-white shadow-primary hover:bg-primary-dark">
+          Simpan aturan
+        </button>
+      </section>
+    </div>
+  </form>
+{% endblock content %}

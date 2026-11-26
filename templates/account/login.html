@@ -1,0 +1,27 @@
+{% extends "account/base_entrance.html" %}
+{% load allauth %}
+{% block head_title %}Masuk{% endblock head_title %}
+{% block content %}
+  {% element h1 %}
+    Masuk ke akun Anda
+  {% endelement %}
+  {% element p %}
+    Untuk member dan admin {{ site_name }}. Belum punya akun? <a href="{{ signup_url }}">Daftar sebagai member</a>.
+  {% endelement %}
+  {% url 'account_login' as login_url %}
+  {% element form form=form method="post" action=login_url tags="entrance,login" %}
+    {% slot body %}
+      {% csrf_token %}
+      {% element fields form=form %}
+      {% endelement %}
+      {{ redirect_field }}
+    {% endslot %}
+    {% slot actions %}
+      {% element button type="submit" tags="prominent,login" %}
+        Masuk
+      {% endelement %}
+      <a href="{% url 'account_reset_password' %}"
+         class="text-center text-sm font-bold text-primary underline underline-offset-4">Lupa kata sandi?</a>
+    {% endslot %}
+  {% endelement %}
+{% endblock content %}

@@ -1,0 +1,23 @@
+{
+  "name": "sistercreative-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aset front-end (Tailwind CSS, Motion, Lucide) untuk website Sister Creative",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sistercreativetech/sistercreative-web.git"
+  },
+  "scripts": {
+    "dev": "tailwindcss -i assets/css/input.css -o static/css/app.css --watch",
+    "build": "tailwindcss -i assets/css/input.css -o static/css/app.css --minify",
+    "vendor": "node -e \"require('fs').copyFileSync('node_modules/motion/dist/motion.js','static/vendor/motion-'+require('motion/package.json').version+'.js')\""
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.5",
+    "tailwindcss": "4.3.5"
+  },
+  "dependencies": {
+    "lucide-static": "1.80.0",
+    "motion": "14.14.0"
+  }
+}

@@ -1,0 +1,13 @@
+{% comment %}
+  Kartu angka ringkas.
+  Pakai: {% include "components/stat_card.html" with label="..." value=10 icon="users" highlight=True %}
+{% endcomment %}
+<section class="rounded-card border bg-white p-5 {% if highlight %}border-warning/40{% else %}border-line{% endif %}">
+  <div class="flex items-center justify-between">
+    <h2 class="text-sm font-semibold text-muted">{{ label }}</h2>
+    <span class="{% if highlight %}text-warning{% else %}text-primary{% endif %}">
+      {% include "components/icon.html" with name=icon %}
+    </span>
+  </div>
+  <p class="mt-3 text-3xl font-extrabold">{{ value }}</p>
+</section>

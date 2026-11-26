@@ -1,0 +1,42 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Ringkasan{% endblock page_title %}
+{% block content %}
+  {% include "components/page_header.html" with title="Ringkasan" intro="Selamat datang kembali, "|add:user.get_short_name|add:"." %}
+  <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    {% include "components/stat_card.html" with label="Member menunggu persetujuan" value=stats.pending_members icon="clock" highlight=stats.pending_members %}
+    {% include "components/stat_card.html" with label="Member aktif" value=stats.active_members icon="users" %}
+    {% include "components/stat_card.html" with label="Proyek terbit" value=stats.published_projects icon="folder-kanban" %}
+    {% include "components/stat_card.html" with label="Proyek draf" value=stats.draft_projects icon="folder-kanban" %}
+  </div>
+  <section class="mt-10 rounded-card border border-line bg-white"
+           aria-labelledby="pending-title">
+    <div class="flex items-center justify-between gap-4 border-b border-line p-5">
+      <h2 id="pending-title" class="text-lg font-bold">Menunggu persetujuan</h2>
+      <a href="{% url 'dashboard:member_list' %}?status=pending"
+         class="text-sm font-bold text-primary underline underline-offset-4">Lihat semua</a>
+    </div>
+    {% if pending_preview %}
+      <ul class="divide-y divide-line">
+        {% for member in pending_preview %}
+          <li class="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <a href="{% url 'dashboard:member_detail' member.pk %}"
+                 class="font-bold hover:text-primary">{{ member.full_name }}</a>
+              <p class="text-sm text-muted">
+                {{ member.email }}
+                {% if member.whatsapp_number %}· +{{ member.whatsapp_number }}{% endif %}
+                · daftar {{ member.date_joined|timesince }} lalu
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              {% include "components/member_status_button.html" with member=member status="active" label="Setujui" icon="user-check" variant="primary" next="list" %}
+              {% include "components/member_status_button.html" with member=member status="rejected" label="Tolak" icon="user-x" variant="danger" next="list" %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="p-5 text-muted">Tidak ada pendaftaran baru. Semua sudah ditinjau.</p>
+    {% endif %}
+  </section>
+{% endblock content %}

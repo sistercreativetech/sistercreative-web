@@ -1,0 +1,34 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}
+  {% if object %}
+    Ubah grup
+  {% else %}
+    Buat grup
+  {% endif %}
+{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'members:group_list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Semua grup
+  </a>
+  <div class="max-w-xl rounded-card border border-line bg-white p-6 md:p-8">
+    <h1 class="text-2xl font-extrabold">
+      {% if object %}
+        Ubah grup
+      {% else %}
+        Buat grup
+      {% endif %}
+    </h1>
+    <form method="post" class="mt-6 flex flex-col gap-5" novalidate>
+      {% csrf_token %}
+      {% include "components/form_non_field_errors.html" %}
+      {% include "components/form_field.html" with field=form.name %}
+      {% include "components/form_field.html" with field=form.description %}
+      <button type="submit"
+              class="inline-flex min-h-12 items-center justify-center rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+        Simpan grup
+      </button>
+    </form>
+  </div>
+{% endblock content %}

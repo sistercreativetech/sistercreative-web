@@ -1,0 +1,28 @@
+{% extends "account/base_entrance.html" %}
+{% load allauth %}
+{% block head_title %}Daftar member{% endblock head_title %}
+{% block content %}
+  {% element h1 %}
+    Daftar sebagai member
+  {% endelement %}
+  {% element p %}
+    Sudah punya akun? <a href="{{ login_url }}">Masuk di sini</a>.
+  {% endelement %}
+  <div class="mt-6 rounded-button bg-primary-soft px-4 py-3 text-sm text-primary-dark">
+    Akun baru akan ditinjau admin terlebih dahulu. Setelah disetujui, Anda bisa mulai mengirim pesan WhatsApp dari dashboard member.
+  </div>
+  {% url 'account_signup' as action_url %}
+  {% element form form=form method="post" action=action_url tags="entrance,signup" %}
+    {% slot body %}
+      {% csrf_token %}
+      {% element fields form=form %}
+      {% endelement %}
+      {{ redirect_field }}
+    {% endslot %}
+    {% slot actions %}
+      {% element button tags="prominent,signup" type="submit" %}
+        Daftar
+      {% endelement %}
+    {% endslot %}
+  {% endelement %}
+{% endblock content %}

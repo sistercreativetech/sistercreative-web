@@ -1,0 +1,23 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Hapus {{ object_type }}{% endblock page_title %}
+{% block content %}
+  <div class="mx-auto max-w-lg rounded-card border border-line bg-white p-6 md:p-8">
+    <span class="grid size-12 place-items-center rounded-xl bg-danger-soft text-danger">
+      {% include "components/icon.html" with name="trash-2" class="size-6" %}
+    </span>
+    <h1 class="mt-5 text-2xl font-extrabold">Hapus {{ object_type }} “{{ object }}”?</h1>
+    <p class="mt-2 text-muted">
+      {% if delete_note %}{{ delete_note }}{% endif %}
+      Tindakan ini tidak bisa dibatalkan.
+    </p>
+    <form method="post" class="mt-6 flex flex-col gap-3 sm:flex-row">
+      {% csrf_token %}
+      <button type="submit"
+              class="inline-flex min-h-12 flex-1 items-center justify-center rounded-button bg-danger px-5 font-extrabold text-white hover:bg-danger/90">
+        Ya, hapus
+      </button>
+      <a href="{{ cancel_url }}"
+         class="inline-flex min-h-12 flex-1 items-center justify-center rounded-button border border-line px-5 font-bold hover:border-primary hover:text-primary">Batal</a>
+    </form>
+  </div>
+{% endblock content %}

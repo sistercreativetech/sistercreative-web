@@ -1,0 +1,119 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Impor kontak{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'members:contact_list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Semua kontak
+  </a>
+  <h1 class="mb-8 text-3xl font-extrabold">Impor kontak dari CSV</h1>
+  {% if result %}
+    <section class="mb-8 rounded-card border border-line bg-white p-6"
+             aria-labelledby="result-title"
+             role="status">
+      <h2 id="result-title" class="text-lg font-bold">Hasil impor</h2>
+      <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-button bg-success-soft p-4 text-success">
+          <dt class="font-semibold">Kontak baru</dt>
+          <dd class="text-2xl font-extrabold">
+            {{ result.created }}
+          </dd>
+        </div>
+        <div class="rounded-button bg-surface p-4">
+          <dt class="font-semibold text-muted">Sudah ada sebelumnya</dt>
+          <dd class="text-2xl font-extrabold">
+            {{ result.existing }}
+          </dd>
+        </div>
+        <div class="rounded-button bg-surface p-4">
+          <dt class="font-semibold text-muted">Ganda di file</dt>
+          <dd class="text-2xl font-extrabold">
+            {{ result.duplicates_in_file }}
+          </dd>
+        </div>
+        <div class="rounded-button p-4 {% if result.invalid_count %}bg-danger-soft text-danger{% else %}bg-surface{% endif %}">
+          <dt class="font-semibold">Nomor tidak valid</dt>
+          <dd class="text-2xl font-extrabold">
+            {{ result.invalid_count }}
+          </dd>
+        </div>
+      </dl>
+      {% if result.group %}
+        <p class="mt-4 text-sm">
+          Semua kontak valid dimasukkan ke grup <strong>{{ result.group.name }}</strong>.
+        </p>
+      {% endif %}
+      {% if result.skipped_over_limit %}
+        <p class="mt-4 rounded-button bg-warning-soft px-4 py-3 text-sm font-semibold text-warning">
+          {{ result.skipped_over_limit }} kontak tidak diimpor karena batas jumlah kontak sudah tercapai.
+        </p>
+      {% endif %}
+      {% if result.invalid_rows %}
+        <h3 class="mt-6 text-sm font-bold">Baris yang dilewati</h3>
+        <div class="mt-2 overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="text-xs uppercase tracking-wider text-muted">
+              <tr>
+                <th scope="col" class="py-2 pr-4">Baris</th>
+                <th scope="col" class="py-2 pr-4">Isi nomor</th>
+                <th scope="col" class="py-2">Alasan</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-line">
+              {% for line, value, reason in result.invalid_rows %}
+                <tr>
+                  <td class="py-2 pr-4 tabular-nums">{{ line }}</td>
+                  <td class="py-2 pr-4">{{ value }}</td>
+                  <td class="py-2 text-muted">{{ reason }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if result.invalid_count > result.invalid_rows|length %}
+          <p class="mt-2 text-sm text-muted">
+            Ditampilkan {{ result.invalid_rows|length }} dari {{ result.invalid_count }} baris bermasalah.
+          </p>
+        {% endif %}
+      {% endif %}
+      <a href="{% url 'members:contact_list' %}{% if result.group %}?group={{ result.group.pk }}{% endif %}"
+         class="mt-6 inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+        Lihat kontak
+        {% include "components/icon.html" with name="arrow-right" class="size-4" %}
+      </a>
+    </section>
+  {% endif %}
+  <div class="grid gap-6 lg:grid-cols-[1fr_20rem]">
+    <form method="post"
+          enctype="multipart/form-data"
+          class="flex flex-col gap-5 rounded-card border border-line bg-white p-6 md:p-8"
+          novalidate>
+      {% csrf_token %}
+      {% include "components/form_non_field_errors.html" %}
+      {% include "components/form_field.html" with field=form.file %}
+      {% include "components/form_field.html" with field=form.group %}
+      {% include "components/form_field.html" with field=form.new_group_name %}
+      <button type="submit"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+        {% include "components/icon.html" with name="upload" class="size-4" %}
+        Impor kontak
+      </button>
+    </form>
+    <aside class="self-start rounded-card bg-white p-6 text-sm"
+           aria-labelledby="tips-title">
+      <h2 id="tips-title" class="font-bold">Format file</h2>
+      <ul class="mt-3 flex list-disc flex-col gap-2 pl-5 text-muted">
+        <li>Baris pertama berisi judul kolom: <strong>nama</strong> dan <strong>nomor</strong>.</li>
+        <li>Nomor boleh ditulis 0812…, 62812…, atau +62 812….</li>
+        <li>Di Excel, ubah kolom nomor menjadi <em>Text</em> agar angka tidak berubah jadi 6,28E+12.</li>
+        <li>Nomor yang sudah ada tidak akan digandakan.</li>
+        <li>Maksimal 5.000 baris dan 1 MB per file.</li>
+      </ul>
+      <a href="{% url 'members:contact_sample' %}"
+         class="mt-4 inline-flex items-center gap-2 font-bold text-primary underline underline-offset-4">
+        {% include "components/icon.html" with name="download" class="size-4" %}
+        Unduh contoh CSV
+      </a>
+    </aside>
+  </div>
+{% endblock content %}

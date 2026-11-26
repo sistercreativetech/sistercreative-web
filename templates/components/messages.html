@@ -1,0 +1,12 @@
+{% comment %}Pesan flash Django (sukses, info, peringatan, error).{% endcomment %}
+{% if messages %}
+  <div class="container-site mt-6 flex flex-col gap-3"
+       role="status"
+       aria-live="polite">
+    {% for message in messages %}
+      <p class="rounded-button border px-4 py-3 text-sm font-semibold {% if message.level_tag == 'error' %}border-danger/30 bg-danger-soft text-danger{% elif message.level_tag == 'warning' %}border-warning/30 bg-warning-soft text-warning{% elif message.level_tag == 'success' %}border-success/30 bg-success-soft text-success{% else %}border-line bg-surface text-ink{% endif %}">
+        {{ message }}
+      </p>
+    {% endfor %}
+  </div>
+{% endif %}

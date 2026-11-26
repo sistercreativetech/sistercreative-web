@@ -1,0 +1,5 @@
+"""Pengaturan untuk menjalankan test."""
+
+from .dev import *  # noqa: F403
+
+PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

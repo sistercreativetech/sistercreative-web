@@ -1,0 +1,50 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Kirim pesan{% endblock page_title %}
+{% block content %}
+  {% url 'campaigns:create' as create_url %}
+  {% include "components/page_header.html" with title="Kampanye WhatsApp" intro="Kirim pesan ke banyak kontak atau grup WA sekaligus, bertahap dan aman." action_url=create_url action_label="Buat kampanye" action_icon="send" %}
+  <p class="mb-6 text-sm text-muted">
+    Sisa kuota hari ini: <strong class="text-ink">{{ remaining_quota }}</strong> dari {{ user.daily_message_quota }} pesan.
+  </p>
+  {% if campaigns %}
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[40rem] text-left text-sm">
+        <caption class="sr-only">Daftar kampanye</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Kampanye</th>
+            <th scope="col" class="px-5 py-3">Status</th>
+            <th scope="col" class="px-5 py-3">Terkirim</th>
+            <th scope="col" class="px-5 py-3">Gagal</th>
+            <th scope="col" class="px-5 py-3">Dibuat</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for campaign in campaigns %}
+            <tr>
+              <td class="px-5 py-4">
+                <a href="{{ campaign.get_absolute_url }}"
+                   class="font-bold hover:text-primary">{{ campaign.name }}</a>
+              </td>
+              <td class="px-5 py-4">{% include "components/campaign_status_badge.html" with campaign=campaign %}</td>
+              <td class="px-5 py-4 tabular-nums">{{ campaign.sent_count }} / {{ campaign.total_count }}</td>
+              <td class="px-5 py-4 tabular-nums">{{ campaign.failed_count }}</td>
+              <td class="px-5 py-4 text-muted">{{ campaign.created_at|date:"j M Y, H:i" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj %}
+  {% else %}
+    <div class="rounded-card border border-dashed border-line bg-white px-6 py-12 text-center">
+      <p class="text-lg font-bold">Belum ada kampanye</p>
+      <p class="mt-2 text-muted">Siapkan kontak, hubungkan WhatsApp, lalu buat kampanye pertama Anda.</p>
+      <a href="{{ create_url }}"
+         class="mt-6 inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+        {% include "components/icon.html" with name="send" class="size-4" %}
+        Buat kampanye
+      </a>
+    </div>
+  {% endif %}
+{% endblock content %}

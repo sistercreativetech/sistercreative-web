@@ -1,0 +1,91 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Buat kampanye{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'campaigns:list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Semua kampanye
+  </a>
+  <h1 class="mb-2 text-3xl font-extrabold">Buat kampanye</h1>
+  <p class="mb-8 text-muted">
+    Kampanye disimpan sebagai draf dulu. Anda bisa memeriksa penerima dan contoh pesan sebelum mulai mengirim.
+  </p>
+  {% if not wa_session or not wa_session.is_connected %}
+    <p class="mb-6 rounded-card border border-warning/30 bg-warning-soft p-4 text-sm font-semibold text-warning">
+      WhatsApp Anda belum terhubung. Draf tetap bisa dibuat, tetapi untuk mulai mengirim <a href="{% url 'whatsapp:session' %}" class="underline">hubungkan WhatsApp</a> dulu.
+    </p>
+  {% endif %}
+  <form method="post" class="grid gap-6 lg:grid-cols-[1fr_22rem]" novalidate>
+    {% csrf_token %}
+    <div class="flex flex-col gap-6">
+      {% if form.non_field_errors %}
+        <div class="rounded-button border border-danger/30 bg-danger-soft px-4 py-3 text-sm font-semibold text-danger"
+             role="alert">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="message-title">
+        <h2 id="message-title" class="text-lg font-bold">Pesan</h2>
+        {% include "components/form_field.html" with field=form.name %}
+        {% include "components/form_field.html" with field=form.template %}
+        {% include "components/form_field.html" with field=form.body %}
+      </section>
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="target-title">
+        <h2 id="target-title" class="text-lg font-bold">Tujuan</h2>
+        {% include "components/form_field.html" with field=form.send_to_all_contacts %}
+        <fieldset class="flex flex-col gap-2">
+          <legend class="mb-1 text-sm font-bold">Grup kontak</legend>
+          {% for checkbox in form.contact_groups %}
+            <label class="flex items-center gap-2.5 text-sm">
+              {{ checkbox.tag }}
+              {{ checkbox.choice_label }}
+            </label>
+          {% empty %}
+            <p class="text-sm text-muted">
+              Belum ada grup kontak. <a href="{% url 'members:group_create' %}"
+                                        class="font-bold text-primary underline">Buat grup</a>.
+            </p>
+          {% endfor %}
+        </fieldset>
+        <fieldset class="flex flex-col gap-2">
+          <legend class="mb-1 text-sm font-bold">Grup WhatsApp</legend>
+          {% for checkbox in form.wa_groups %}
+            <label class="flex items-center gap-2.5 text-sm">
+              {{ checkbox.tag }}
+              {{ checkbox.choice_label }}
+            </label>
+          {% empty %}
+            <p class="text-sm text-muted">
+              {% if wa_groups_error %}
+                Daftar grup WA gagal dimuat. Coba lagi nanti.
+              {% elif wa_session and wa_session.is_connected %}
+                Nomor Anda belum bergabung di grup WA mana pun.
+              {% else %}
+                Hubungkan WhatsApp untuk memilih grup WA.
+              {% endif %}
+            </p>
+          {% endfor %}
+        </fieldset>
+      </section>
+    </div>
+    <aside class="flex flex-col gap-6 self-start">
+      <section class="rounded-card bg-white p-6 text-sm"
+               aria-labelledby="quota-title">
+        <h2 id="quota-title" class="font-bold">Kuota hari ini</h2>
+        <p class="mt-2 text-3xl font-extrabold">{{ remaining_quota }}</p>
+        <p class="text-muted">pesan tersisa dari {{ user.daily_message_quota }}</p>
+        <ul class="mt-4 flex list-disc flex-col gap-1.5 pl-5 text-muted">
+          <li>Kontak yang berhenti berlangganan otomatis dilewati.</li>
+          <li>Kontak di beberapa grup hanya dikirimi sekali.</li>
+          <li>Pesan pribadi diberi catatan “Balas STOP untuk berhenti”.</li>
+        </ul>
+      </section>
+      <button type="submit"
+              class="inline-flex min-h-13 items-center justify-center gap-2 rounded-button bg-primary px-6 font-extrabold text-white shadow-primary hover:bg-primary-dark">
+        Simpan sebagai draf
+      </button>
+    </aside>
+  </form>
+{% endblock content %}

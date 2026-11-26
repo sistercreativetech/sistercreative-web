@@ -1,0 +1,110 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}WhatsApp{% endblock page_title %}
+{% block content %}
+  {% include "components/page_header.html" with title="Hubungkan WhatsApp" intro="Pesan dikirim dari nomor WhatsApp Anda sendiri. Hubungkan sekali dengan scan QR, seperti WhatsApp Web." %}
+  {% if not waha_configured %}
+    <p class="rounded-card border border-warning/30 bg-warning-soft p-5 font-semibold text-warning"
+       role="alert">Server WhatsApp belum disiapkan admin. Silakan coba lagi nanti.</p>
+  {% else %}
+    <div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <section class="rounded-card border border-line bg-white p-6 md:p-8"
+               aria-labelledby="status-title"
+               data-wa-session
+               data-status="{{ wa_session.status }}"
+               data-status-url="{% url 'whatsapp:session_status' %}"
+               data-qr-url="{% url 'whatsapp:session_qr' %}">
+        <div class="flex flex-wrap items-center gap-3">
+          <h2 id="status-title" class="text-lg font-bold">Status</h2>
+          <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold {% if wa_session.is_connected %}bg-success-soft text-success{% elif wa_session.status == 'SCAN_QR_CODE' or wa_session.status == 'STARTING' %}bg-warning-soft text-warning{% else %}bg-surface text-muted{% endif %}"
+                data-wa-status-label
+                aria-live="polite">{{ wa_session.get_status_display }}</span>
+        </div>
+        {% if waha_error %}
+          <p class="mt-4 rounded-button bg-danger-soft px-4 py-3 text-sm font-semibold text-danger"
+             role="alert">Server WhatsApp sedang tidak bisa dihubungi. Status di bawah mungkin belum terbaru.</p>
+        {% endif %}
+        {% if wa_session.is_connected %}
+          <dl class="mt-6 grid gap-4 text-sm sm:grid-cols-2">
+            <div>
+              <dt class="text-muted">Nomor terhubung</dt>
+              <dd class="font-semibold">
+                +{{ wa_session.connected_number }}
+              </dd>
+            </div>
+            {% if wa_session.connected_name %}
+              <div>
+                <dt class="text-muted">Nama profil</dt>
+                <dd class="font-semibold">
+                  {{ wa_session.connected_name }}
+                </dd>
+              </div>
+            {% endif %}
+          </dl>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="{% url 'campaigns:create' %}"
+               class="inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+              {% include "components/icon.html" with name="send" class="size-4" %}
+              Buat kampanye
+            </a>
+            <a href="{% url 'whatsapp:group_list' %}"
+               class="inline-flex min-h-11 items-center gap-2 rounded-button border border-line px-5 font-bold hover:border-primary hover:text-primary">
+              {% include "components/icon.html" with name="users" class="size-4" %}
+              Lihat grup WA
+            </a>
+            <form method="post" action="{% url 'whatsapp:session_disconnect' %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="inline-flex min-h-11 items-center gap-2 rounded-button border border-danger/40 bg-white px-5 font-bold text-danger hover:bg-danger-soft">
+                {% include "components/icon.html" with name="unplug" class="size-4" %}
+                Putuskan
+              </button>
+            </form>
+          </div>
+        {% elif wa_session.status == "SCAN_QR_CODE" or wa_session.status == "STARTING" %}
+          <div class="mt-6 flex flex-col items-start gap-4 sm:flex-row">
+            <div class="grid size-64 shrink-0 place-items-center rounded-card border border-line bg-white p-2">
+              <img src="{% url 'whatsapp:session_qr' %}"
+                   alt="Kode QR untuk menghubungkan WhatsApp"
+                   width="240"
+                   height="240"
+                   class="size-60"
+                   data-wa-qr>
+            </div>
+            <ol class="flex list-decimal flex-col gap-2 pl-5 text-sm">
+              <li>Buka WhatsApp di ponsel yang nomornya akan dipakai.</li>
+              <li>Ketuk <strong>Perangkat tertaut</strong> lalu <strong>Tautkan perangkat</strong>.</li>
+              <li>Arahkan kamera ke kode QR ini.</li>
+              <li>Halaman akan berubah otomatis setelah terhubung.</li>
+            </ol>
+          </div>
+          <p class="mt-4 text-sm text-muted">QR diperbarui otomatis. Bila tidak muncul, muat ulang halaman.</p>
+        {% else %}
+          <p class="mt-4 text-muted">WhatsApp belum terhubung ke akun ini.</p>
+          <form method="post"
+                action="{% url 'whatsapp:session_connect' %}"
+                class="mt-6">
+            {% csrf_token %}
+            <button type="submit"
+                    class="inline-flex min-h-12 items-center gap-2 rounded-button bg-primary px-6 font-extrabold text-white shadow-primary hover:bg-primary-dark">
+              {% include "components/icon.html" with name="qr-code" class="size-5" %}
+              Tampilkan kode QR
+            </button>
+          </form>
+        {% endif %}
+      </section>
+      <aside class="self-start rounded-card bg-white p-6 text-sm"
+             aria-labelledby="safety-title">
+        <h2 id="safety-title" class="flex items-center gap-2 font-bold">
+          {% include "components/icon.html" with name="triangle-alert" class="size-4 text-warning" %}
+          Agar nomor tetap aman
+        </h2>
+        <ul class="mt-3 flex list-disc flex-col gap-2 pl-5 text-muted">
+          <li>Kirim hanya ke orang yang sudah mengenal Anda atau setuju menerima pesan.</li>
+          <li>Pesan dikirim bertahap dengan jeda {{ blast_delay_min }}–{{ blast_delay_max }} detik.</li>
+          <li>Kontak yang membalas STOP otomatis tidak dikirimi lagi.</li>
+          <li>Nomor baru sebaiknya mulai dari jumlah kecil dulu.</li>
+        </ul>
+      </aside>
+    </div>
+  {% endif %}
+{% endblock content %}

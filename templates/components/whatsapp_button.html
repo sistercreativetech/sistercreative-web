@@ -1,0 +1,12 @@
+{% comment %}
+  Tombol WhatsApp ke nomor CONTACT_WHATSAPP.
+  Pakai: {% include "components/whatsapp_button.html" with text="..." label="..." variant="primary|light" %}
+{% endcomment %}
+<a href="https://wa.me/{{ contact_whatsapp }}?text={{ text|urlencode }}"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-button px-6 font-extrabold transition hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-auto {% if variant == 'light' %}bg-white text-primary hover:bg-primary-soft{% else %}bg-primary text-white shadow-primary hover:bg-primary-dark{% endif %}">
+  {% include "components/icon.html" with name="message-circle" class="size-5" %}
+  <span>{{ label }}</span>
+  <span class="sr-only">(membuka WhatsApp di tab baru)</span>
+</a>

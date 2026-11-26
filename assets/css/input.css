@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+@source "../../templates";
+@source "../../apps";
+
+/*
+ * Token desain Sister Creative. Lihat docs/DESIGN.md.
+ * Palet bawaan Tailwind dimatikan: warna HANYA boleh dari token di bawah.
+ */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-primary: #6d28d9;
+  --color-primary-dark: #4c1d95;
+  --color-primary-soft: #efe5ff;
+  --color-primary-light: #c8a8ff;
+  --color-accent: #f4c95d;
+  --color-ink: #17131f;
+  --color-muted: #6d6876;
+  --color-surface: #f7f5fb;
+  --color-line: #e7e1ee;
+  --color-dark: #181221;
+  --color-dark-raised: #251d30;
+  --color-on-dark-muted: #bcb3c7;
+  --color-success: #15803d;
+  --color-success-soft: #dcfce7;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+  --color-warning: #92400e;
+  --color-warning-soft: #fef3c7;
+
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --text-display: clamp(2.5rem, 5vw, 4.75rem);
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.04em;
+  --text-heading: clamp(2rem, 3.5vw, 3.25rem);
+  --text-heading--line-height: 1.12;
+  --text-heading--letter-spacing: -0.03em;
+  --text-eyebrow: 0.78rem;
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 0.14em;
+
+  --radius-button: 14px;
+  --radius-card: 22px;
+  --radius-panel: 32px;
+
+  --shadow-soft: 0 24px 70px rgb(53 28 85 / 0.14);
+  --shadow-primary: 0 14px 30px rgb(109 40 217 / 0.24);
+
+  --container-site: 1160px;
+}
+
+@utility container-site {
+  width: min(var(--container-site), 100% - 2rem);
+  margin-inline: auto;
+
+  @media (width >= 48rem) {
+    width: min(var(--container-site), 100% - 2.5rem);
+  }
+}
+
+@utility bg-hero {
+  background-image:
+    radial-gradient(circle at 80% 20%, var(--color-primary-soft) 0, transparent 34%),
+    linear-gradient(180deg, var(--color-white), var(--color-surface));
+}
+
+/* Pasang di section berlatar gelap agar outline fokus tetap kontras (≥ 3:1). */
+@utility on-dark {
+  & :focus-visible {
+    outline-color: var(--color-primary-light);
+  }
+}
+
+/* Elemen [data-reveal] disembunyikan hanya bila JS aktif dan pengguna tidak
+   memilih reduced motion; static/js/app.js lalu menganimasikannya. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-reveal]:not(.is-revealed) {
+    opacity: 0;
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white font-sans text-base leading-[1.7] text-ink antialiased;
+  }
+
+  /* Gaya form global: berlaku juga untuk form bawaan allauth. */
+  input:where(
+      [type="text"],
+      [type="email"],
+      [type="password"],
+      [type="search"],
+      [type="tel"],
+      [type="url"],
+      [type="number"],
+      [type="date"]
+    ),
+  select,
+  textarea {
+    @apply block min-h-12 w-full rounded-button border border-line bg-white px-4 py-2.5 text-base text-ink placeholder:text-muted hover:border-muted;
+  }
+
+  input[aria-invalid="true"],
+  select[aria-invalid="true"],
+  textarea[aria-invalid="true"] {
+    @apply border-danger;
+  }
+
+  input[type="file"] {
+    @apply block w-full text-sm text-muted file:mr-4 file:min-h-11 file:cursor-pointer file:rounded-button file:border-0 file:bg-primary-soft file:px-4 file:font-bold file:text-primary hover:file:bg-primary hover:file:text-white;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    @apply size-5 accent-primary;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}

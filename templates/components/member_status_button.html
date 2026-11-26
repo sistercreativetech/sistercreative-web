@@ -1,0 +1,15 @@
+{% comment %}
+  Tombol POST ubah status member.
+  Pakai: {% include "components/member_status_button.html" with member=member status="active" label="Setujui" icon="user-check" variant="primary|danger|default" next="list" %}
+{% endcomment %}
+<form method="post" action="{% url 'dashboard:member_status' member.pk %}">
+  {% csrf_token %}
+  <input type="hidden" name="status" value="{{ status }}">
+  {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+  <button type="submit"
+          class="inline-flex min-h-11 items-center gap-1.5 rounded-button px-4 text-sm font-bold {% if variant == 'primary' %}bg-primary text-white hover:bg-primary-dark{% elif variant == 'danger' %}border border-danger/40 bg-white text-danger hover:bg-danger-soft{% else %}border border-line bg-white hover:border-primary hover:text-primary{% endif %}">
+    {% include "components/icon.html" with name=icon class="size-4" %}
+    {{ label }}
+    <span class="sr-only">{{ member.full_name }}</span>
+  </button>
+</form>

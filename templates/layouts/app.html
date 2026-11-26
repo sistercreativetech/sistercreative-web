@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% comment %}
+  Layout area login (member & dashboard admin).
+  Blok: app_label (nama area), app_nav (tautan navigasi area), page_title, content.
+{% endcomment %}
+{% block body_class %}bg-surface{% endblock body_class %}
+{% block header %}
+  <header class="border-b border-line bg-white">
+    <div class="container-site flex min-h-16 items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        {% include "components/brand.html" %}
+        <span class="hidden rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary sm:inline">
+          {% block app_label %}
+          {% endblock app_label %}
+        </span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="hidden text-sm text-muted md:inline">{{ user.get_short_name }}</span>
+        <form method="post" action="{% url 'account_logout' %}">
+          {% csrf_token %}
+          <button type="submit"
+                  class="inline-flex min-h-11 items-center gap-2 rounded-button border border-line px-4 text-sm font-bold hover:border-primary hover:text-primary">
+            {% include "components/icon.html" with name="log-out" class="size-4" %}
+            Keluar
+          </button>
+        </form>
+      </div>
+    </div>
+    <nav aria-label="Navigasi area"
+         class="container-site -mb-px flex gap-6 overflow-x-auto text-sm font-bold">
+      {% block app_nav %}
+      {% endblock app_nav %}
+    </nav>
+  </header>
+{% endblock header %}
+{% block main %}
+  {% include "components/messages.html" %}
+  <div class="container-site py-8 md:py-12">
+    {% block content %}
+    {% endblock content %}
+  </div>
+{% endblock main %}

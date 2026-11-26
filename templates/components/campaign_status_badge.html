@@ -1,0 +1,2 @@
+{% comment %}Badge status kampanye. Pakai: {% include "components/campaign_status_badge.html" with campaign=campaign %}{% endcomment %}
+<span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold {% if campaign.status == 'completed' %}bg-success-soft text-success{% elif campaign.status == 'queued' or campaign.status == 'running' %}bg-primary-soft text-primary{% elif campaign.status == 'failed' or campaign.status == 'cancelled' %}bg-danger-soft text-danger{% else %}bg-surface text-muted{% endif %}">{{ campaign.get_status_display }}</span>
