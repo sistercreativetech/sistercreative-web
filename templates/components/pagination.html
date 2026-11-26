@@ -1,0 +1,24 @@
+{% comment %}
+  Navigasi halaman untuk ListView.
+  Pakai: {% include "components/pagination.html" with page_obj=page_obj querystring=filter_querystring %}
+{% endcomment %}
+{% if page_obj.has_other_pages %}
+  <nav class="mt-12 grid grid-cols-[1fr_auto_1fr] items-center gap-4"
+       aria-label="Navigasi halaman">
+    {% if page_obj.has_previous %}
+      <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"
+         class="col-start-1 inline-flex min-h-11 items-center gap-1.5 justify-self-start rounded-button border border-line bg-white px-4 font-bold hover:border-primary hover:text-primary">
+        {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+        Sebelumnya
+      </a>
+    {% endif %}
+    <p class="col-start-2 text-center text-sm text-muted">Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</p>
+    {% if page_obj.has_next %}
+      <a href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}"
+         class="col-start-3 inline-flex min-h-11 items-center gap-1.5 justify-self-end rounded-button border border-line bg-white px-4 font-bold hover:border-primary hover:text-primary">
+        Berikutnya
+        {% include "components/icon.html" with name="chevron-right" class="size-4" %}
+      </a>
+    {% endif %}
+  </nav>
+{% endif %}

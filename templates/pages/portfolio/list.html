@@ -1,0 +1,65 @@
+{% extends "layouts/public.html" %}
+{% block title %}Portofolio — {{ site_name }}{% endblock title %}
+{% block meta_description %}Contoh website, aplikasi web, bot WhatsApp & Telegram, serta automasi kerja yang dibuat Sister Creative untuk UMKM, sekolah, dan lembaga.{% endblock meta_description %}
+{% block content %}
+  <section class="bg-hero pt-14 pb-12 md:pt-20 md:pb-16"
+           aria-labelledby="page-title">
+    <div class="container-site">
+      <p class="mb-3.5 text-eyebrow font-extrabold uppercase text-primary">Portofolio</p>
+      <h1 id="page-title"
+          class="max-w-3xl text-heading font-extrabold">Sistem yang dibuat untuk benar-benar digunakan</h1>
+      <p class="mt-4.5 max-w-2xl text-lg text-muted">
+        Beberapa website, aplikasi, dan automasi yang sudah kami bangun bersama klien.
+      </p>
+    </div>
+  </section>
+  <section class="bg-surface pt-10 pb-18 md:pb-24"
+           aria-labelledby="daftar-title">
+    <div class="container-site">
+      <form method="get"
+            role="search"
+            aria-label="Saring portofolio"
+            class="grid gap-5 rounded-card border border-line bg-white p-5 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end md:gap-4">
+        {% include "components/form_field.html" with field=filter.form.q %}
+        {% include "components/form_field.html" with field=filter.form.category %}
+        {% include "components/form_field.html" with field=filter.form.tag %}
+        <div class="flex gap-2">
+          <button type="submit"
+                  class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark md:flex-none">
+            {% include "components/icon.html" with name="search" class="size-4" %}
+            Terapkan
+          </button>
+          {% if is_filtered %}
+            <a href="{% url 'portfolio:list' %}"
+               class="inline-flex min-h-12 items-center justify-center rounded-button border border-line px-4 font-bold hover:border-primary hover:text-primary">Reset</a>
+          {% endif %}
+        </div>
+      </form>
+      <h2 id="daftar-title" class="sr-only">Daftar proyek</h2>
+      <p class="mt-8 mb-5 text-sm font-semibold text-muted" aria-live="polite">
+        {% if paginator %}
+          {{ paginator.count }} proyek{% if is_filtered %} sesuai pencarian{% endif %}
+        {% else %}
+          0 proyek
+        {% endif %}
+      </p>
+      {% if projects %}
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {% for project in projects %}
+            {% include "components/portfolio_card.html" with project=project tone="light" %}
+          {% endfor %}
+        </div>
+        {% include "components/pagination.html" with page_obj=page_obj querystring=filter_querystring %}
+      {% else %}
+        <div class="rounded-card border border-dashed border-line bg-white px-6 py-12 text-center">
+          <p class="text-lg font-bold">Belum ada proyek yang cocok.</p>
+          <p class="mt-2 text-muted">Coba kata kunci lain atau hapus filter yang dipilih.</p>
+          {% if is_filtered %}
+            <a href="{% url 'portfolio:list' %}"
+               class="mt-6 inline-flex min-h-11 items-center rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">Lihat semua proyek</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock content %}

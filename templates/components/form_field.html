@@ -1,0 +1,13 @@
+{% comment %}
+  Field form dengan label, bantuan, dan error yang terhubung via aria-describedby.
+  Pakai: {% include "components/form_field.html" with field=form.nama %}
+{% endcomment %}
+<div class="flex flex-col gap-1.5">
+  <label for="{{ field.id_for_label }}" class="text-sm font-bold">{{ field.label }}</label>
+  {{ field }}
+  {% if field.help_text %}
+    <p id="{{ field.auto_id }}_helptext" class="text-sm text-muted">{{ field.help_text }}</p>
+  {% endif %}
+  {% for error in field.errors %}<p id="{{ field.auto_id }}_error"
+                                    class="text-sm font-semibold text-danger">{{ error }}</p>{% endfor %}
+</div>

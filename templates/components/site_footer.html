@@ -8,7 +8,8 @@
     <nav aria-label="Navigasi footer"
          class="flex flex-col items-start gap-4 md:flex-row md:items-center md:gap-6">
       <a href="{{ home_url }}#layanan" class="font-bold hover:text-primary">Layanan</a>
-      <a href="{{ home_url }}#portofolio" class="font-bold hover:text-primary">Portofolio</a>
+      <a href="{% url 'portfolio:list' %}"
+         class="font-bold hover:text-primary">Portofolio</a>
       <a href="{{ home_url }}#proses" class="font-bold hover:text-primary">Proses</a>
       <a href="https://wa.me/{{ contact_whatsapp }}"
          target="_blank"

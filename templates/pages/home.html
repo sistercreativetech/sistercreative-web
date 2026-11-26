@@ -1,7 +1,4 @@
-{% extends "base.html" %}
-{% block header %}
-  {% include "components/site_header.html" %}
-{% endblock header %}
+{% extends "layouts/public.html" %}
 {% block content %}
   {# Hero #}
   <section class="bg-hero overflow-hidden pt-14 pb-18 md:pt-24 md:pb-22"
@@ -100,16 +97,23 @@
     </div>
   </section>
   {# Portofolio #}
-  <section class="bg-dark py-18 text-white md:py-24"
+  <section class="on-dark bg-dark py-18 text-white md:py-24"
            id="portofolio"
            aria-labelledby="portofolio-title">
     <div class="container-site">
       {% include "components/section_head.html" with eyebrow="Portofolio" title="Sistem yang dibuat untuk benar-benar digunakan" tone="dark" heading_id="portofolio-title" %}
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {% for item in portfolio_items %}
-          {% include "components/portfolio_card.html" with item=item number=forloop.counter %}
+        {% for project in featured_projects %}
+          {% include "components/portfolio_card.html" with project=project %}
+        {% empty %}
+          <p class="text-on-dark-muted md:col-span-2 lg:col-span-3">Proyek pilihan sedang kami siapkan.</p>
         {% endfor %}
       </div>
+      <a href="{% url 'portfolio:list' %}"
+         class="mt-10 inline-flex min-h-13 items-center gap-2 rounded-button border border-white/20 px-6 font-extrabold transition hover:border-primary-light hover:text-primary-light motion-reduce:transition-none">
+        Lihat semua portofolio
+        {% include "components/icon.html" with name="arrow-right" class="size-4" %}
+      </a>
     </div>
   </section>
   {# Proses #}
@@ -149,6 +153,3 @@
     </div>
   </section>
 {% endblock content %}
-{% block footer %}
-  {% include "components/site_footer.html" %}
-{% endblock footer %}

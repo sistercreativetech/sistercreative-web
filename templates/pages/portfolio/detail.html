@@ -1,0 +1,109 @@
+{% extends "layouts/public.html" %}
+{% block title %}{{ project.title }} — Portofolio {{ site_name }}{% endblock title %}
+{% block meta_description %}{{ project.summary }}{% endblock meta_description %}
+{% block content %}
+  <article aria-labelledby="page-title">
+    <header class="bg-hero pt-10 pb-12 md:pt-14 md:pb-16">
+      <div class="container-site">
+        <nav aria-label="Breadcrumb" class="mb-8 text-sm">
+          <ol class="flex flex-wrap items-center gap-1.5 text-muted">
+            <li>
+              <a href="{% url 'core:home' %}" class="hover:text-primary">Beranda</a>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <a href="{% url 'portfolio:list' %}" class="hover:text-primary">Portofolio</a>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li aria-current="page" class="font-semibold text-ink">{{ project.title }}</li>
+          </ol>
+        </nav>
+        <p class="mb-3.5 text-eyebrow font-extrabold uppercase text-primary">{{ project.category.name }}</p>
+        <h1 id="page-title" class="max-w-4xl text-heading font-extrabold">{{ project.title }}</h1>
+        <p class="mt-4.5 max-w-2xl text-lg text-muted">{{ project.summary }}</p>
+        <dl class="mt-8 flex flex-wrap gap-x-10 gap-y-4 text-sm">
+          {% if project.client_name %}
+            <div>
+              <dt class="font-semibold text-muted">Klien</dt>
+              <dd class="font-bold">
+                {{ project.client_name }}
+              </dd>
+            </div>
+          {% endif %}
+          {% if project.year %}
+            <div>
+              <dt class="font-semibold text-muted">Tahun</dt>
+              <dd class="font-bold">
+                {{ project.year }}
+              </dd>
+            </div>
+          {% endif %}
+          {% with tags=project.tags.all %}
+            {% if tags %}
+              <div>
+                <dt class="font-semibold text-muted">Teknologi</dt>
+                <dd>
+                  <ul class="mt-1 flex flex-wrap gap-2">
+                    {% for tag in tags %}
+                      <li>
+                        <a href="{% url 'portfolio:list' %}?tag={{ tag.slug|urlencode }}"
+                           class="inline-block rounded-full bg-primary-soft px-3 py-1 text-xs font-bold text-primary hover:bg-primary hover:text-white">{{ tag.name }}</a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </dd>
+              </div>
+            {% endif %}
+          {% endwith %}
+        </dl>
+      </div>
+    </header>
+    <div class="container-site py-12 md:py-16">
+      {% if project.cover_image %}
+        <img src="{{ project.cover_image.url }}"
+             alt="{{ project.cover_alt }}"
+             width="1280"
+             height="720"
+             class="mb-12 aspect-video w-full rounded-panel object-cover shadow-soft">
+      {% endif %}
+      <div class="grid gap-12 lg:grid-cols-[1fr_20rem]">
+        <div class="max-w-2xl text-lg leading-relaxed [&_p+p]:mt-5">
+          {% if project.description %}
+            {{ project.description|linebreaks }}
+          {% else %}
+            <p>{{ project.summary }}</p>
+          {% endif %}
+        </div>
+        <aside class="flex flex-col gap-4 self-start rounded-card bg-surface p-6"
+               aria-label="Tindakan">
+          <p class="font-bold">Mau sistem serupa untuk usaha Anda?</p>
+          {% with text="Halo Sister Creative, saya tertarik dengan proyek "|add:project.title|add:". Bisa konsultasi?" %}
+            {% include "components/whatsapp_button.html" with text=text label="Konsultasi via WhatsApp" %}
+          {% endwith %}
+          {% if project.project_url %}
+            <a href="{{ project.project_url }}"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="inline-flex min-h-13 items-center justify-center gap-2 rounded-button border border-line bg-white px-6 font-extrabold hover:border-primary hover:text-primary">
+              Kunjungi proyek
+              {% include "components/icon.html" with name="external-link" class="size-4" %}
+              <span class="sr-only">(membuka tab baru)</span>
+            </a>
+          {% endif %}
+        </aside>
+      </div>
+    </div>
+  </article>
+  {% if related_projects %}
+    <section class="bg-surface py-18 md:py-24" aria-labelledby="related-title">
+      <div class="container-site">
+        <h2 id="related-title" class="mb-8 text-2xl font-extrabold">Proyek lain di {{ project.category.name }}</h2>
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {% for item in related_projects %}
+            {% include "components/portfolio_card.html" with project=item tone="light" %}
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+  {% endif %}
+{% endblock content %}

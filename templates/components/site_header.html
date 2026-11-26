@@ -18,7 +18,7 @@
       {% url 'core:home' as home_url %}
       <a href="{{ home_url }}#layanan"
          class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Layanan</a>
-      <a href="{{ home_url }}#portofolio"
+      <a href="{% url 'portfolio:list' %}"
          class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Portofolio</a>
       <a href="{{ home_url }}#proses"
          class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Proses</a>

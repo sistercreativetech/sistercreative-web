@@ -66,6 +66,13 @@
     linear-gradient(180deg, var(--color-white), var(--color-surface));
 }
 
+/* Pasang di section berlatar gelap agar outline fokus tetap kontras (≥ 3:1). */
+@utility on-dark {
+  & :focus-visible {
+    outline-color: var(--color-primary-light);
+  }
+}
+
 /* Elemen [data-reveal] disembunyikan hanya bila JS aktif dan pengguna tidak
    memilih reduced motion; static/js/app.js lalu menganimasikannya. */
 @media (prefers-reduced-motion: no-preference) {

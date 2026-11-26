@@ -1,8 +1,4 @@
-"""Konten statis landing page.
-
-Portofolio di sini hanya sementara; di Langkah 2 diganti data dari database
-yang dikelola lewat dashboard admin.
-"""
+"""Konten statis landing page. Portofolio diambil dari database (apps.portfolio)."""
 
 TRUST_POINTS = [
     "Solusi sesuai kebutuhan",
@@ -58,35 +54,6 @@ SERVICES = [
     },
 ]
 
-PORTFOLIO = [
-    {
-        "category": "Aplikasi Web",
-        "title": "Admin Ngaji Privat Lombok",
-        "summary": (
-            "Dashboard mobile untuk melihat data murid dan guru dari Google Sheets, "
-            "dilengkapi pencarian serta tombol WhatsApp."
-        ),
-        "tags": ["Google Sheets", "n8n", "Web Mobile"],
-    },
-    {
-        "category": "Automasi",
-        "title": "Bot Laporan Pembayaran",
-        "summary": (
-            "Alur pencatatan transaksi, bukti transfer, penyimpanan data, "
-            "dan laporan berkala melalui Telegram."
-        ),
-        "tags": ["Telegram", "Drive", "Reporting"],
-    },
-    {
-        "category": "Administrasi",
-        "title": "Input Data Otomatis",
-        "summary": (
-            "Sistem yang mengubah pesan terstruktur menjadi data rapi "
-            "dan mengurangi pekerjaan input manual."
-        ),
-        "tags": ["Workflow", "Sheets", "Notification"],
-    },
-]
 
 PROCESS_STEPS = [
     {

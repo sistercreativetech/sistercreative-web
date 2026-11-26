@@ -1,12 +1,37 @@
-<article class="flex flex-col rounded-card border border-white/10 bg-dark-raised p-6 md:p-8"
+{% comment %}
+  Kartu proyek portofolio; seluruh kartu dapat diklik lewat tautan judul.
+  Pakai: {% include "components/portfolio_card.html" with project=project tone="dark|light" heading="h2|h3" %}
+{% endcomment %}
+<article class="group relative flex flex-col overflow-hidden rounded-card border transition hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0 {% if tone == 'light' %}border-line bg-white hover:shadow-soft{% else %}border-white/10 bg-dark-raised{% endif %}"
          data-reveal>
-  <div class="flex justify-between text-xs font-extrabold uppercase tracking-widest text-primary-light">
-    <span>{{ item.category }}</span>
-    <span>0{{ number }}</span>
+  {% if project.cover_image %}
+    <img src="{{ project.cover_image.url }}"
+         alt="{{ project.cover_alt }}"
+         width="640"
+         height="360"
+         loading="lazy"
+         decoding="async"
+         class="aspect-video w-full object-cover">
+  {% endif %}
+  <div class="flex flex-1 flex-col p-6 md:p-8">
+    <p class="text-xs font-extrabold uppercase tracking-widest {% if tone == 'light' %}text-primary{% else %}text-primary-light{% endif %}">
+      {{ project.category.name }}
+    </p>
+    <h3 class="mt-6 mb-3.5 text-2xl font-bold leading-tight {% if not project.cover_image %}md:mt-10{% endif %}">
+      <a href="{{ project.get_absolute_url }}"
+         class="after:absolute after:inset-0 after:content-[''] group-focus-within:underline group-hover:underline">{{ project.title }}</a>
+    </h3>
+    <p class="{% if tone == 'light' %}text-muted{% else %}text-on-dark-muted{% endif %}">{{ project.summary }}</p>
+    {% with tags=project.tags.all %}
+      {% if tags %}
+        <ul class="mt-auto flex flex-wrap gap-2 pt-6" aria-label="Teknologi">
+          {% for tag in tags %}
+            <li class="rounded-full px-2.5 py-1.5 text-xs {% if tone == 'light' %}bg-surface text-muted{% else %}bg-white/10 text-on-dark-muted{% endif %}">
+              {{ tag.name }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
   </div>
-  <h3 class="mt-10 mb-3.5 text-2xl font-bold leading-tight md:mt-14">{{ item.title }}</h3>
-  <p class="text-on-dark-muted">{{ item.summary }}</p>
-  <ul class="mt-6 flex flex-wrap gap-2" aria-label="Teknologi">
-    {% for tag in item.tags %}<li class="rounded-full bg-white/10 px-2.5 py-1.5 text-xs text-on-dark-muted">{{ tag }}</li>{% endfor %}
-  </ul>
 </article>
