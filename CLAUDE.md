@@ -54,3 +54,6 @@
   (pending/active/rejected/suspended). Status diubah hanya lewat `apps/accounts/services.py`.
 - Akses: `StaffRequiredMixin` untuk dashboard, `ApprovedMemberRequiredMixin` untuk area member (apps/accounts/mixins.py).
 - Halaman allauth ada di /akun/; tampilannya diatur lewat override di templates/allauth/ (layouts + elements) dan templates/account/.
+- Data milik member (kontak, grup, template, nanti kampanye): selalu pakai `OwnedQuerysetMixin` + `owned_selector`
+  dan `OwnerFormMixin` (apps/members/mixins.py), sehingga data member lain menghasilkan 404. Ada test IDOR yang wajib ikut diperluas.
+- Ikon: parameter aksesibelnya `icon_label` (bukan `label`) agar variabel komponen luar tidak bocor.

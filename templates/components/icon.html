@@ -1,7 +1,8 @@
 {% comment %}
   Ikon Lucide inline.
   Pakai: {% include "components/icon.html" with name="check" class="size-5" %}
-  Opsional: label="Teks" agar ikon dibacakan pembaca layar (default dekoratif).
+  Opsional: icon_label="Teks" agar ikon dibacakan pembaca layar (default dekoratif).
+  Sengaja bukan "label": variabel "label" dari komponen luar tidak boleh bocor ke sini.
   Daftar ikon: apps/core/icons.py, lalu `python manage.py sync_icons`.
 {% endcomment %}
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -12,7 +13,7 @@
      stroke-linecap="round"
      stroke-linejoin="round"
      class="shrink-0 {{ class|default:'size-5' }}"
-     {% if label %}role="img" aria-label="{{ label }}"{% else %}aria-hidden="true"{% endif %}
+     {% if icon_label %}role="img" aria-label="{{ icon_label }}"{% else %}aria-hidden="true"{% endif %}
      focusable="false">
   {% include "components/icons/"|add:name|add:".html" %}
 </svg>

@@ -2,11 +2,19 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
 
-from apps.accounts.mixins import ApprovedMemberRequiredMixin
+from apps.contacts.selectors import member_overview
+
+from .mixins import MemberAreaMixin
 
 
-class MemberHomeView(ApprovedMemberRequiredMixin, TemplateView):
+class MemberHomeView(MemberAreaMixin, TemplateView):
+    section = "home"
     template_name = "pages/members/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["overview"] = member_overview(self.request.user)
+        return context
 
 
 class PendingApprovalView(LoginRequiredMixin, TemplateView):

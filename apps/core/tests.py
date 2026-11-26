@@ -98,10 +98,18 @@ class IconTests(SimpleTestCase):
         self.assertIn("<path", html)
 
     def test_icon_with_label_is_announced(self):
-        html = render_to_string("components/icon.html", {"name": "check", "label": "Selesai"})
+        html = render_to_string("components/icon.html", {"name": "check", "icon_label": "Selesai"})
         self.assertIn('role="img"', html)
         self.assertIn('aria-label="Selesai"', html)
         self.assertNotIn("aria-hidden", html)
+
+    def test_outer_label_does_not_leak_into_icon(self):
+        html = render_to_string(
+            "components/app_nav_link.html",
+            {"url": "/x/", "label": "Kontak", "icon": "users", "active": True},
+        )
+        self.assertIn('aria-hidden="true"', html)
+        self.assertNotIn('aria-label="Kontak"', html)
 
     def test_sync_icons_command(self):
         out = StringIO()

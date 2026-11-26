@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.portfolio",
+    "apps.contacts",
     "apps.members",
     "apps.dashboard",
 ]
@@ -140,6 +141,11 @@ ACCOUNT_PREVENT_ENUMERATION = True
 
 # Kuota awal pesan WhatsApp per member per hari (bisa diubah admin per member).
 DEFAULT_DAILY_MESSAGE_QUOTA = int(env("DEFAULT_DAILY_MESSAGE_QUOTA", "100"))
+
+# Batas kontak per member dan impor CSV.
+MAX_CONTACTS_PER_MEMBER = int(env("MAX_CONTACTS_PER_MEMBER", "5000"))
+CONTACT_IMPORT_MAX_ROWS = 5000
+CONTACT_IMPORT_MAX_BYTES = 1024 * 1024
 
 # --- Email ------------------------------------------------------------------
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

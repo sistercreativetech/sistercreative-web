@@ -1,0 +1,116 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Kontak{% endblock page_title %}
+{% block content %}
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-3xl font-extrabold">Kontak</h1>
+      <p class="mt-2 text-muted">{{ total_contacts }} kontak tersimpan.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'members:contact_import' %}"
+         class="inline-flex min-h-11 items-center gap-2 rounded-button border border-line bg-white px-4 font-bold hover:border-primary hover:text-primary">
+        {% include "components/icon.html" with name="upload" class="size-4" %}
+        Impor CSV
+      </a>
+      <a href="{% url 'members:contact_create' %}"
+         class="inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-4 font-extrabold text-white hover:bg-primary-dark">
+        {% include "components/icon.html" with name="user-plus" class="size-4" %}
+        Tambah kontak
+      </a>
+    </div>
+  </div>
+  <form method="get"
+        role="search"
+        aria-label="Saring kontak"
+        class="grid gap-4 rounded-card border border-line bg-white p-5 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end">
+    {% include "components/form_field.html" with field=filter.form.q hide_optional=True %}
+    {% include "components/form_field.html" with field=filter.form.group hide_optional=True %}
+    {% include "components/form_field.html" with field=filter.form.subscription hide_optional=True %}
+    <div class="flex gap-2">
+      <button type="submit"
+              class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark md:flex-none">
+        {% include "components/icon.html" with name="search" class="size-4" %}
+        Terapkan
+      </button>
+      {% if is_filtered %}
+        <a href="{% url 'members:contact_list' %}"
+           class="inline-flex min-h-12 items-center rounded-button border border-line px-4 font-bold hover:border-primary hover:text-primary">Reset</a>
+      {% endif %}
+    </div>
+  </form>
+  {% if contacts %}
+    <p class="mt-6 mb-3 text-sm font-semibold text-muted">
+      {{ paginator.count }} kontak
+      {% if is_filtered %}sesuai filter{% endif %}
+    </p>
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[40rem] text-left text-sm">
+        <caption class="sr-only">Daftar kontak</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Nama</th>
+            <th scope="col" class="px-5 py-3">Nomor</th>
+            <th scope="col" class="px-5 py-3">Grup</th>
+            <th scope="col" class="px-5 py-3">
+              <span class="sr-only">Aksi</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for contact in contacts %}
+            <tr>
+              <td class="px-5 py-4">
+                <span class="font-bold">{{ contact.name|default:"Tanpa nama" }}</span>
+                {% if contact.is_opted_out %}
+                  <span class="ml-1 inline-flex items-center gap-1 rounded-full bg-danger-soft px-2 py-0.5 text-xs font-bold text-danger">
+                    {% include "components/icon.html" with name="bell-off" class="size-3" %}
+                    Berhenti
+                  </span>
+                {% endif %}
+              </td>
+              <td class="px-5 py-4 tabular-nums">+{{ contact.phone }}</td>
+              <td class="px-5 py-4">
+                <div class="flex flex-wrap gap-1.5">
+                  {% for group in contact.groups.all %}
+                    <span class="rounded-full bg-surface px-2.5 py-1 text-xs text-muted">{{ group.name }}</span>
+                  {% empty %}
+                    <span class="text-muted">—</span>
+                  {% endfor %}
+                </div>
+              </td>
+              <td class="px-5 py-4">
+                <div class="flex justify-end gap-4 font-bold">
+                  <a href="{% url 'members:contact_update' contact.pk %}"
+                     class="inline-flex items-center gap-1 text-primary hover:underline">
+                    {% include "components/icon.html" with name="pencil" class="size-4" %}
+                    Ubah<span class="sr-only"> {{ contact }}</span>
+                  </a>
+                  <a href="{% url 'members:contact_delete' contact.pk %}"
+                     class="inline-flex items-center gap-1 text-danger hover:underline">
+                    {% include "components/icon.html" with name="trash-2" class="size-4" %}
+                    Hapus<span class="sr-only"> {{ contact }}</span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj querystring=filter_querystring %}
+  {% elif is_filtered %}
+    <p class="mt-6 rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      Tidak ada kontak yang cocok dengan filter.
+    </p>
+  {% else %}
+    <div class="mt-6 rounded-card border border-dashed border-line bg-white px-6 py-12 text-center">
+      <p class="text-lg font-bold">Belum ada kontak</p>
+      <p class="mt-2 text-muted">Mulai dengan mengimpor file CSV dari Excel atau Google Sheets.</p>
+      <a href="{% url 'members:contact_import' %}"
+         class="mt-6 inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+        {% include "components/icon.html" with name="upload" class="size-4" %}
+        Impor kontak
+      </a>
+    </div>
+  {% endif %}
+{% endblock content %}
