@@ -1,0 +1,41 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Grup WhatsApp{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'whatsapp:session' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    WhatsApp
+  </a>
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-3xl font-extrabold">Grup WhatsApp saya</h1>
+      <p class="mt-2 text-muted">Grup yang diikuti nomor Anda. Bisa dipilih sebagai tujuan kampanye.</p>
+    </div>
+    <a href="?muat_ulang=1"
+       class="inline-flex min-h-11 items-center gap-2 rounded-button border border-line bg-white px-4 font-bold hover:border-primary hover:text-primary">
+      {% include "components/icon.html" with name="refresh-cw" class="size-4" %}
+      Muat ulang
+    </a>
+  </div>
+  {% if not wa_session or not wa_session.is_connected %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      WhatsApp belum terhubung. <a href="{% url 'whatsapp:session' %}"
+                                   class="font-bold text-primary underline">Hubungkan dulu</a>.
+    </p>
+  {% elif waha_error %}
+    <p class="rounded-card bg-danger-soft p-5 font-semibold text-danger"
+       role="alert">Daftar grup gagal dimuat. Coba muat ulang beberapa saat lagi.</p>
+  {% elif wa_groups %}
+    <p class="mb-3 text-sm font-semibold text-muted">{{ wa_groups|length }} grup</p>
+    <ul class="divide-y divide-line rounded-card border border-line bg-white">
+      {% for group in wa_groups %}<li class="px-5 py-4 font-semibold">{{ group.name }}</li>{% endfor %}
+    </ul>
+    <p class="mt-4 text-sm text-muted">
+      Pada grup yang hanya mengizinkan admin mengirim pesan, pengiriman akan gagal bila Anda bukan admin.
+    </p>
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      Nomor ini belum bergabung di grup mana pun.
+    </p>
+  {% endif %}
+{% endblock content %}

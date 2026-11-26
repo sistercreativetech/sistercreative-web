@@ -10,6 +10,9 @@ from django_filters.views import FilterView
 
 from apps.accounts import services as account_services
 from apps.accounts.mixins import StaffRequiredMixin
+from apps.campaigns import selectors as campaign_selectors
+from apps.campaigns import services as campaign_services
+from apps.campaigns.models import Campaign
 from apps.portfolio.models import Category, Project
 
 from . import selectors
@@ -221,3 +224,37 @@ class CategoryDeleteView(DashboardMixin, DeleteView):
             return redirect("dashboard:category_list")
         messages.success(self.request, f"Kategori “{name}” dihapus.")
         return response
+
+
+# --- Kampanye -----------------------------------------------------------------
+
+
+class CampaignListView(DashboardMixin, ListView):
+    section = "campaigns"
+    template_name = "pages/dashboard/campaigns/list.html"
+    context_object_name = "campaigns"
+    paginate_by = 30
+
+    def get_queryset(self):
+        queryset = campaign_selectors.all_campaigns_with_counts()
+        status = self.request.GET.get("status")
+        if status in Campaign.Status.values:
+            queryset = queryset.filter(status=status)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["status_choices"] = Campaign.Status.choices
+        context["current_status"] = self.request.GET.get("status", "")
+        context["filter_querystring"] = (
+            f"status={context['current_status']}" if context["current_status"] else ""
+        )
+        return context
+
+
+class CampaignCancelView(StaffRequiredMixin, View):
+    def post(self, request, pk):
+        campaign = get_object_or_404(Campaign, pk=pk)
+        campaign_services.cancel_campaign(campaign, by=request.user)
+        messages.success(request, f"Kampanye “{campaign.name}” dihentikan.")
+        return redirect("dashboard:campaign_list")

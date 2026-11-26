@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.portfolio",
     "apps.contacts",
+    "apps.whatsapp",
+    "apps.campaigns",
     "apps.members",
     "apps.dashboard",
 ]
@@ -146,6 +148,21 @@ DEFAULT_DAILY_MESSAGE_QUOTA = int(env("DEFAULT_DAILY_MESSAGE_QUOTA", "100"))
 MAX_CONTACTS_PER_MEMBER = int(env("MAX_CONTACTS_PER_MEMBER", "5000"))
 CONTACT_IMPORT_MAX_ROWS = 5000
 CONTACT_IMPORT_MAX_BYTES = 1024 * 1024
+
+# --- WhatsApp (WAHA) & pengiriman (n8n) -----------------------------------------
+# URL publik situs, dipakai untuk alamat webhook/callback yang dipanggil WAHA & n8n.
+SITE_URL = env("SITE_URL", "http://127.0.0.1:8000")
+WAHA_BASE_URL = env("WAHA_BASE_URL", "")
+WAHA_API_KEY = env("WAHA_API_KEY", "")
+WAHA_WEBHOOK_TOKEN = env("WAHA_WEBHOOK_TOKEN", "")
+N8N_BLAST_WEBHOOK_URL = env("N8N_BLAST_WEBHOOK_URL", "")
+N8N_BLAST_TOKEN = env("N8N_BLAST_TOKEN", "")
+N8N_CALLBACK_TOKEN = env("N8N_CALLBACK_TOKEN", "")
+# Jeda acak antar-pesan (detik) untuk mengurangi risiko nomor diblokir.
+BLAST_DELAY_MIN = int(env("BLAST_DELAY_MIN", "8"))
+BLAST_DELAY_MAX = int(env("BLAST_DELAY_MAX", "20"))
+# Ditambahkan di akhir pesan ke kontak pribadi (tidak untuk grup WA).
+OPT_OUT_FOOTER = "\n\n_Balas STOP untuk berhenti menerima pesan._"
 
 # --- Email ------------------------------------------------------------------
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

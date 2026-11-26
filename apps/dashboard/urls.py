@@ -17,4 +17,6 @@ urlpatterns = [
     path("kategori/baru/", views.CategoryCreateView.as_view(), name="category_create"),
     path("kategori/<int:pk>/ubah/", views.CategoryUpdateView.as_view(), name="category_update"),
     path("kategori/<int:pk>/hapus/", views.CategoryDeleteView.as_view(), name="category_delete"),
+    path("kampanye/", views.CampaignListView.as_view(), name="campaign_list"),
+    path("kampanye/<int:pk>/hentikan/", views.CampaignCancelView.as_view(), name="campaign_cancel"),
 ]

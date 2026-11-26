@@ -1,0 +1,75 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Kampanye{% endblock page_title %}
+{% block content %}
+  {% include "components/page_header.html" with title="Kampanye member" intro="Pantau pengiriman semua member dan hentikan bila ada penyalahgunaan." %}
+  <form method="get"
+        aria-label="Saring kampanye"
+        class="mb-6 flex flex-wrap items-end gap-3 rounded-card border border-line bg-white p-5">
+    <div class="flex flex-col gap-1.5">
+      <label for="id_status" class="text-sm font-bold">Status</label>
+      <select name="status" id="id_status">
+        <option value="">Semua status</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}"
+                  {% if value == current_status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit"
+            class="inline-flex min-h-12 items-center rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+      Terapkan
+    </button>
+  </form>
+  {% if campaigns %}
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[48rem] text-left text-sm">
+        <caption class="sr-only">Daftar kampanye semua member</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Kampanye</th>
+            <th scope="col" class="px-5 py-3">Member</th>
+            <th scope="col" class="px-5 py-3">Status</th>
+            <th scope="col" class="px-5 py-3">Terkirim / total</th>
+            <th scope="col" class="px-5 py-3">Gagal</th>
+            <th scope="col" class="px-5 py-3">
+              <span class="sr-only">Aksi</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for campaign in campaigns %}
+            <tr>
+              <td class="px-5 py-4">
+                <span class="font-bold">{{ campaign.name }}</span>
+                <div class="text-muted">{{ campaign.created_at|date:"j M Y, H:i" }}</div>
+              </td>
+              <td class="px-5 py-4">
+                <a href="{% url 'dashboard:member_detail' campaign.owner.pk %}"
+                   class="font-semibold hover:text-primary">{{ campaign.owner.full_name }}</a>
+              </td>
+              <td class="px-5 py-4">{% include "components/campaign_status_badge.html" with campaign=campaign %}</td>
+              <td class="px-5 py-4 tabular-nums">{{ campaign.sent_count }} / {{ campaign.total_count }}</td>
+              <td class="px-5 py-4 tabular-nums">{{ campaign.failed_count }}</td>
+              <td class="px-5 py-4 text-right">
+                {% if not campaign.is_finished %}
+                  <form method="post"
+                        action="{% url 'dashboard:campaign_cancel' campaign.pk %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="inline-flex min-h-11 items-center gap-1.5 rounded-button border border-danger/40 bg-white px-4 text-sm font-bold text-danger hover:bg-danger-soft">
+                      {% include "components/icon.html" with name="square" class="size-4" %}
+                      Hentikan<span class="sr-only"> {{ campaign.name }}</span>
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj querystring=filter_querystring %}
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">Belum ada kampanye.</p>
+  {% endif %}
+{% endblock content %}
