@@ -22,6 +22,19 @@
          class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Portofolio</a>
       <a href="{{ home_url }}#proses"
          class="rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">Proses</a>
+      {% if user.is_authenticated %}
+        <a href="{% if user.is_staff %}{% url 'dashboard:home' %}{% else %}{% url 'members:home' %}{% endif %}"
+           class="inline-flex items-center gap-2 rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">
+          {% include "components/icon.html" with name="circle-user" class="size-5" %}
+          {% if user.is_staff %}Dashboard{% else %}Akun saya{% endif %}
+        </a>
+      {% else %}
+        <a href="{% url 'account_login' %}"
+           class="inline-flex items-center gap-2 rounded-button px-3 py-2.5 text-base font-semibold hover:text-primary md:p-0">
+          {% include "components/icon.html" with name="log-in" class="size-5" %}
+          Masuk
+        </a>
+      {% endif %}
       <a href="{{ home_url }}#kontak"
          class="mt-2 rounded-full bg-ink px-4 py-2.5 text-center text-base font-semibold text-white hover:bg-primary md:mt-0">Konsultasi</a>
     </nav>

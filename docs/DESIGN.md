@@ -82,3 +82,13 @@ Breakpoint yang wajib dicek: **375px** (mobile), **768px** (`md`) dan **1280px**
 - Fokus keyboard selalu terlihat (outline `primary` 3px dari `:focus-visible`).
 - Ada tautan "Lewati ke konten" di `base.html`.
 - Field form wajib punya `<label>`, dan pesan error dihubungkan lewat `aria-describedby`.
+
+## Form & layout
+
+- Input, select, textarea, checkbox dan radio sudah diberi gaya global di `assets/css/input.css` (`@layer base`), sehingga form bawaan allauth ikut seragam. Tidak perlu menambahkan kelas pada widget.
+- Render field lewat `{% include "components/form_field.html" with field=form.x %}`. Komponen ini memasang `aria-describedby` (bantuan dan error) dan `aria-invalid` lewat tag `{% render_widget %}`. Tambahkan `hide_optional=True` di form filter.
+- Layout yang tersedia:
+  - `layouts/public.html`: situs publik.
+  - `layouts/auth.html`: kartu di tengah, dipakai halaman akun dan semua halaman allauth.
+  - `layouts/member.html` dan `layouts/dashboard.html`: area login, turunan dari `layouts/app.html`.
+- Pesan flash ditampilkan otomatis oleh `components/messages.html`.

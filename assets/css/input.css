@@ -90,6 +90,33 @@
     @apply bg-white font-sans text-base leading-[1.7] text-ink antialiased;
   }
 
+  /* Gaya form global: berlaku juga untuk form bawaan allauth. */
+  input:where(
+      [type="text"],
+      [type="email"],
+      [type="password"],
+      [type="search"],
+      [type="tel"],
+      [type="url"],
+      [type="number"],
+      [type="date"]
+    ),
+  select,
+  textarea {
+    @apply block min-h-12 w-full rounded-button border border-line bg-white px-4 py-2.5 text-base text-ink placeholder:text-muted hover:border-muted;
+  }
+
+  input[aria-invalid="true"],
+  select[aria-invalid="true"],
+  textarea[aria-invalid="true"] {
+    @apply border-danger;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    @apply size-5 accent-primary;
+  }
+
   :focus-visible {
     outline: 3px solid var(--color-primary);
     outline-offset: 3px;

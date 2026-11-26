@@ -1,13 +1,28 @@
+{% load form_tags %}
 {% comment %}
   Field form dengan label, bantuan, dan error yang terhubung via aria-describedby.
-  Pakai: {% include "components/form_field.html" with field=form.nama %}
+  Pakai: {% include "components/form_field.html" with field=form.nama %} (hide_optional=True untuk form filter)
 {% endcomment %}
-<div class="flex flex-col gap-1.5">
-  <label for="{{ field.id_for_label }}" class="text-sm font-bold">{{ field.label }}</label>
-  {{ field }}
-  {% if field.help_text %}
-    <p id="{{ field.auto_id }}_helptext" class="text-sm text-muted">{{ field.help_text }}</p>
-  {% endif %}
-  {% for error in field.errors %}<p id="{{ field.auto_id }}_error"
-                                    class="text-sm font-semibold text-danger">{{ error }}</p>{% endfor %}
-</div>
+{% if field.widget_type == "checkbox" %}
+  <div class="flex items-center gap-2.5">
+    {% render_widget field %}
+    <label for="{{ field.id_for_label }}" class="text-sm font-semibold">{{ field.label }}</label>
+  </div>
+{% else %}
+  <div class="flex flex-col gap-1.5">
+    <label for="{{ field.id_for_label }}" class="text-sm font-bold">
+      {{ field.label }}
+      {% if not field.field.required and not hide_optional %}<span class="font-normal text-muted">(opsional)</span>{% endif %}
+    </label>
+    {% render_widget field %}
+    {% if field.help_text %}
+      <div id="{{ field.auto_id }}_helptext"
+           class="text-sm text-muted [&_li]:ml-4 [&_li]:list-disc">{{ field.help_text }}</div>
+    {% endif %}
+    {% if field.errors %}
+      <div id="{{ field.auto_id }}_error" class="text-sm font-semibold text-danger">
+        {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+  </div>
+{% endif %}

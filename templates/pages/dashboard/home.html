@@ -1,0 +1,23 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Ringkasan{% endblock page_title %}
+{% block content %}
+  <h1 class="text-3xl font-extrabold">Ringkasan</h1>
+  <p class="mt-2 text-muted">Selamat datang, {{ user.get_short_name }}.</p>
+  <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    {% include "components/stat_card.html" with label="Member menunggu persetujuan" value=stats.pending_members icon="clock" highlight=stats.pending_members %}
+    {% include "components/stat_card.html" with label="Member aktif" value=stats.active_members icon="users" %}
+    {% include "components/stat_card.html" with label="Proyek terbit" value=stats.published_projects icon="folder-kanban" %}
+    {% include "components/stat_card.html" with label="Proyek draf" value=stats.draft_projects icon="folder-kanban" %}
+  </div>
+  <section class="mt-10 rounded-card border border-line bg-white p-6">
+    <h2 class="text-lg font-bold">Sementara: kelola lewat panel bawaan</h2>
+    <p class="mt-1 text-muted">
+      Persetujuan member dan pengelolaan portofolio akan pindah ke dashboard ini. Untuk sekarang, gunakan panel admin bawaan.
+    </p>
+    <a href="{% url 'admin:index' %}"
+       class="mt-4 inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+      Buka panel admin
+      {% include "components/icon.html" with name="arrow-right" class="size-4" %}
+    </a>
+  </section>
+{% endblock content %}

@@ -1,0 +1,7 @@
+{% extends "layouts/app.html" %}
+{% block title %}{% block page_title %}Area member{% endblock page_title %} — {{ site_name }}{% endblock title %}
+{% block app_label %}Member{% endblock app_label %}
+{% block app_nav %}
+  {% url 'members:home' as members_home %}
+  {% include "components/app_nav_link.html" with url=members_home label="Beranda member" icon="layout-dashboard" active=True %}
+{% endblock app_nav %}

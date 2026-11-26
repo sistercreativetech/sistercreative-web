@@ -5,11 +5,6 @@ from django.db.models import Q
 from . import selectors
 from .models import Project
 
-FIELD_CLASS = (
-    "block w-full min-h-12 rounded-button border border-line bg-white px-4 text-base text-ink "
-    "placeholder:text-muted hover:border-muted"
-)
-
 
 class ProjectFilter(django_filters.FilterSet):
     q = django_filters.CharFilter(
@@ -18,7 +13,6 @@ class ProjectFilter(django_filters.FilterSet):
         max_length=100,
         widget=forms.TextInput(
             attrs={
-                "class": FIELD_CLASS,
                 "placeholder": "Contoh: WhatsApp, laporan",
                 "type": "search",
             }
@@ -30,7 +24,6 @@ class ProjectFilter(django_filters.FilterSet):
         queryset=lambda request: selectors.categories_with_projects(),
         label="Kategori",
         empty_label="Semua kategori",
-        widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
     tag = django_filters.ModelChoiceFilter(
         field_name="tags",
@@ -38,7 +31,6 @@ class ProjectFilter(django_filters.FilterSet):
         queryset=lambda request: selectors.tags_with_projects(),
         label="Teknologi",
         empty_label="Semua teknologi",
-        widget=forms.Select(attrs={"class": FIELD_CLASS}),
     )
 
     class Meta:

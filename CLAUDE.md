@@ -50,3 +50,7 @@
 - WhatsApp: satu sesi WAHA per member (scan QR). Django → webhook n8n (HMAC) → WAHA, lalu status dikirim balik via callback.
 - Member mendaftar sendiri dan baru aktif setelah disetujui admin.
 - Situs statis lama + Cloudflare Worker disimpan di legacy/ sebagai referensi konten.
+- User kustom `accounts.User`: login memakai email, ada field `full_name`, `whatsapp_number` (format 62...) dan `status`
+  (pending/active/rejected/suspended). Status diubah hanya lewat `apps/accounts/services.py`.
+- Akses: `StaffRequiredMixin` untuk dashboard, `ApprovedMemberRequiredMixin` untuk area member (apps/accounts/mixins.py).
+- Halaman allauth ada di /akun/; tampilannya diatur lewat override di templates/allauth/ (layouts + elements) dan templates/account/.

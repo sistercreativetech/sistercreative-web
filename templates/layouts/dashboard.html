@@ -1,0 +1,7 @@
+{% extends "layouts/app.html" %}
+{% block title %}{% block page_title %}Dashboard{% endblock page_title %} — Admin {{ site_name }}{% endblock title %}
+{% block app_label %}Admin{% endblock app_label %}
+{% block app_nav %}
+  {% url 'dashboard:home' as dashboard_home %}
+  {% include "components/app_nav_link.html" with url=dashboard_home label="Ringkasan" icon="layout-dashboard" active=True %}
+{% endblock app_nav %}

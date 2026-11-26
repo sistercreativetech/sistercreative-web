@@ -20,9 +20,9 @@
             role="search"
             aria-label="Saring portofolio"
             class="grid gap-5 rounded-card border border-line bg-white p-5 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end md:gap-4">
-        {% include "components/form_field.html" with field=filter.form.q %}
-        {% include "components/form_field.html" with field=filter.form.category %}
-        {% include "components/form_field.html" with field=filter.form.tag %}
+        {% include "components/form_field.html" with field=filter.form.q hide_optional=True %}
+        {% include "components/form_field.html" with field=filter.form.category hide_optional=True %}
+        {% include "components/form_field.html" with field=filter.form.tag hide_optional=True %}
         <div class="flex gap-2">
           <button type="submit"
                   class="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark md:flex-none">

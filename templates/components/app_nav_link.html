@@ -1,0 +1,10 @@
+{% comment %}
+  Tautan tab di layout app.
+  Pakai: {% include "components/app_nav_link.html" with url=... label="..." icon="..." active=True %}
+{% endcomment %}
+<a href="{{ url }}"
+   class="inline-flex min-h-12 shrink-0 items-center gap-2 border-b-2 {% if active %}border-primary text-primary{% else %}border-transparent text-muted hover:text-ink{% endif %}"
+   {% if active %}aria-current="page"{% endif %}>
+  {% include "components/icon.html" with name=icon class="size-4" %}
+  {{ label }}
+</a>
