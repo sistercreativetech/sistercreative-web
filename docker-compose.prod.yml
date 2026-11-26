@@ -1,9 +1,9 @@
-# Stack produksi website Sister Creative.
+# Stack produksi website Sister Creative (VPS Hostinger srv1967964).
 # Jalankan di VPS:  docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 #
-# Default (Pilihan A): Caddy internal hanya terbuka di 127.0.0.1:8080, lalu reverse proxy
-# yang sudah ada di VPS (mis. Traefik bawaan template n8n) diarahkan ke sana.
-# Pilihan B (tanpa proxy lain): lihat README bagian "Deploy".
+# Lalu lintas: Cloudflare -> Traefik (network host, sudah ada di VPS) -> caddy -> web -> db
+# Traefik menemukan container lewat label di layanan "caddy" (pola sama dengan n8n).
+# Django bergabung ke jaringan WAHA agar bisa memanggil WAHA secara internal (http://waha:3000).
 
 name: sistercreative
 
@@ -35,34 +35,35 @@ services:
         condition: service_healthy
     volumes:
       - media:/app/media
+    networks:
+      - default
+      - waha
 
   caddy:
     image: caddy:2.8-alpine
     restart: unless-stopped
     depends_on:
       - web
-    ports:
-      - "127.0.0.1:8080:80"
     volumes:
       - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
       - media:/srv/media:ro
       - caddy-data:/data
-    # Pilihan A dengan Traefik: hapus "ports" di atas, hubungkan ke jaringan Traefik,
-    # dan aktifkan label berikut (sesuaikan nama entrypoint/certresolver Traefik Anda).
-    # networks: [default, traefik]
-    # labels:
-    #   - traefik.enable=true
-    #   - traefik.http.routers.sistercreative.rule=Host(`sistercreative.tech`) || Host(`www.sistercreative.tech`)
-    #   - traefik.http.routers.sistercreative.entrypoints=websecure
-    #   - traefik.http.routers.sistercreative.tls.certresolver=mytlschallenge
-    #   - traefik.http.services.sistercreative.loadbalancer.server.port=80
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=sistercreative_default
+      - traefik.http.routers.sistercreative.rule=Host(`sistercreative.tech`) || Host(`www.sistercreative.tech`)
+      - traefik.http.routers.sistercreative.entrypoints=websecure
+      - traefik.http.routers.sistercreative.tls.certresolver=letsencrypt
+      - traefik.http.services.sistercreative.loadbalancer.server.port=80
 
 volumes:
   postgres-data:
   media:
   caddy-data:
 
-# networks:
-#   traefik:
-#     external: true
-#     name: <nama-jaringan-traefik>  # cek dengan: docker network ls
+networks:
+  default:
+    name: sistercreative_default
+  waha:
+    external: true
+    name: waha-f516_default

@@ -7,7 +7,7 @@ Website, portofolio, dan aplikasi kirim pesan WhatsApp untuk **sistercreative.te
 - **Member** (`/member/`): menghubungkan WhatsApp (scan QR), mengelola kontak/grup/template, mengirim kampanye ke kontak maupun grup WhatsApp, dan **balas otomatis** berdasarkan kata kunci (tanda dibaca + jeda mengetik).
 - **Admin NPL lama** (`/admin`, `/admin/api`): diproksikan ke webhook n8n, dengan path yang sama seperti Cloudflare Worker lama.
 
-Stack: Django 5.2, PostgreSQL, Tailwind CSS v4, django-allauth, WAHA Plus (WhatsApp), n8n.
+Stack: Django 5.2, PostgreSQL, Tailwind CSS v4, django-allauth, WAHA ≥ 2026.6.1 (WhatsApp, multi-sesi sudah termasuk di versi gratis), n8n.
 Aturan kode dan desain ada di [CLAUDE.md](CLAUDE.md) dan [docs/DESIGN.md](docs/DESIGN.md).
 
 ---
@@ -60,7 +60,7 @@ Contoh lengkap ada di [.env.example](.env.example). Jangan pernah commit `.env`.
 | `DJANGO_ADMIN_URL` | Alamat tersembunyi admin bawaan Django, mis. `kelola-a8f3k/` (**jangan** `admin/`, karena path itu dipakai admin NPL lama) |
 | `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | Database produksi |
 | `SITE_URL` | `https://sistercreative.tech`, dipakai WAHA dan n8n untuk memanggil balik |
-| `WAHA_BASE_URL`, `WAHA_API_KEY` | Alamat dan API key server WAHA Plus |
+| `WAHA_BASE_URL`, `WAHA_API_KEY` | Alamat dan API key server WAHA (versi ≥ 2026.6.1 agar bisa banyak sesi). Di VPS ini: `http://waha:3000` |
 | `WAHA_WEBHOOK_TOKEN` | Token acak buatan sendiri, dikirim WAHA di header `X-SC-Token`. Tentukan sekali sebelum member menghubungkan WhatsApp |
 | `N8N_BASE_URL` | Alamat n8n, untuk proksi admin NPL |
 | `N8N_BLAST_WEBHOOK_URL` | Production URL webhook workflow "Sister Creative - Blast WA Member (WAHA)" |
@@ -100,35 +100,29 @@ cp .env.example .env && nano .env      # isi semua nilai produksi (lihat tabel d
 chmod 600 .env
 ```
 
-### 2. Cek apakah VPS sudah punya reverse proxy
+### 2. Reverse proxy: Traefik bawaan Hostinger
 
-```bash
-docker ps --format '{{.Names}}\t{{.Image}}\t{{.Ports}}'
+VPS ini sudah menjalankan **Traefik** (`traefik-traefik-1`, network host) dengan entrypoint
+`websecure` dan certresolver `letsencrypt`. Label untuk website sudah dipasang di layanan `caddy`
+pada `docker-compose.prod.yml`, mengikuti pola yang sama dengan n8n. Tidak ada port yang perlu dibuka.
+
+Django juga bergabung ke jaringan WAHA (`waha-f516_default`), jadi di `.env` cukup diisi:
+
+```
+WAHA_BASE_URL=http://waha:3000
 ```
 
-- Kalau ada container (biasanya **traefik**) yang memakai `0.0.0.0:80` dan `0.0.0.0:443`, pakai **Pilihan A**.
-- Kalau port 80/443 masih kosong, pakai **Pilihan B**.
-
-### 3A. Pilihan A: lewat Traefik yang sudah ada
-
-1. Cari nama jaringan Traefik dengan `docker network ls`, lalu catat nama *entrypoint* dan *certresolver* di konfigurasi Traefik/n8n Anda.
-2. Di `docker-compose.prod.yml`, pada layanan `caddy`:
-   - hapus blok `ports`;
-   - aktifkan `networks` dan `labels`, lalu sesuaikan namanya;
-   - aktifkan blok `networks: traefik` di bagian paling bawah.
-3. Jalankan:
+### 3. Jalankan
 
 ```bash
 docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+docker compose -f docker-compose.prod.yml --env-file .env ps
+docker compose -f docker-compose.prod.yml --env-file .env logs -f web
 ```
 
-### 3B. Pilihan B: Caddy memegang HTTPS sendiri
-
-Isi `SITE_DOMAIN=sistercreative.tech` dan `ACME_EMAIL` di `.env`, lalu jalankan:
-
-```bash
-docker compose -f docker-compose.prod.yml -f docker-compose.public.yml --env-file .env up -d --build
-```
+> Server lain tanpa Traefik: pakai Caddy publik dengan
+> `docker compose -f docker-compose.prod.yml -f docker-compose.public.yml --env-file .env up -d --build`
+> (isi `SITE_DOMAIN` dan `ACME_EMAIL`, lalu hapus blok `networks.waha` bila tidak ada WAHA di server itu).
 
 ### 4. Buat akun admin
 
@@ -141,9 +135,12 @@ docker compose -f docker-compose.prod.yml --env-file .env exec web python manage
 > Situs lama masih dilayani Cloudflare Worker (`legacy/wrangler.jsonc`). Lepas dulu Worker-nya supaya tidak menimpa VPS.
 
 1. Cloudflare → **Workers & Pages** → worker `sistercreative-github` → **Settings → Domains & Routes**: hapus custom domain atau route `sistercreative.tech`.
-2. Cloudflare → **DNS**: buat atau ubah record `A` untuk `sistercreative.tech` dan `www` ke IP VPS, dengan status **Proxied** (awan oranye).
-3. Cloudflare → **SSL/TLS**: mode **Full (strict)**.
-4. Pastikan branch `feat/django-foundation` sudah digabung ke `main`, karena itu yang di-clone di VPS. Kalau repo masih terhubung ke Cloudflare Workers Builds, nonaktifkan build otomatis agar tidak mencoba men-deploy worker dari kode baru.
+2. Cloudflare → **DNS**: buat atau ubah record `A` untuk `sistercreative.tech` dan `www` ke IP VPS, **sementara dengan status "DNS only" (awan abu-abu)**.
+   Traefik memakai *HTTP challenge* Let's Encrypt, yang bisa gagal kalau lalu lintas sudah lewat proxy Cloudflare.
+3. Tunggu 1–3 menit, lalu cek `https://sistercreative.tech/healthz/`. Kalau sudah tampil `{"ok": true}` dengan gembok valid, sertifikat sudah terbit.
+4. Setelah itu ubah kedua record menjadi **Proxied** (awan oranye), dan atur Cloudflare → **SSL/TLS** ke mode **Full (strict)**.
+   (Perpanjangan otomatis tiap ~60 hari tetap berjalan selama "Always Use HTTPS" di Cloudflare tidak memblokir `/.well-known/acme-challenge/`. Kalau perpanjangan gagal, ulangi langkah ini.)
+5. Pastikan branch `feat/django-foundation` sudah digabung ke `main`, karena itu yang di-clone di VPS. Kalau repo masih terhubung ke Cloudflare Workers Builds, nonaktifkan build otomatis agar tidak mencoba men-deploy worker dari kode baru.
 
 ### 6. Sambungkan WAHA dan n8n
 
