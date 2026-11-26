@@ -40,6 +40,8 @@ class Campaign(models.Model):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+    # Hapus lunak: disembunyikan dari member, tetapi tetap dihitung untuk kuota harian.
+    deleted_at = models.DateTimeField("dihapus pada", null=True, blank=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]

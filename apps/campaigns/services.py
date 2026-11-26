@@ -174,6 +174,17 @@ def cancel_campaign(campaign: Campaign, *, by=None) -> Campaign:
     return campaign
 
 
+def delete_campaign(campaign: Campaign, *, by=None) -> Campaign:
+    """Hentikan bila masih berjalan, lalu sembunyikan dari member.
+
+    Baris penerima tetap disimpan agar pesan yang sudah terkirim tetap dihitung kuota.
+    """
+    cancel_campaign(campaign, by=by)
+    campaign.deleted_at = timezone.now()
+    campaign.save(update_fields=["deleted_at"])
+    return campaign
+
+
 # --- Callback dari n8n -------------------------------------------------------------
 
 

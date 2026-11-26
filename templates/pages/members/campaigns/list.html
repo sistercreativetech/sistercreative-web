@@ -8,7 +8,7 @@
   </p>
   {% if campaigns %}
     <div class="overflow-x-auto rounded-card border border-line bg-white">
-      <table class="w-full min-w-[40rem] text-left text-sm">
+      <table class="w-full min-w-[44rem] text-left text-sm">
         <caption class="sr-only">Daftar kampanye</caption>
         <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
           <tr>
@@ -17,6 +17,9 @@
             <th scope="col" class="px-5 py-3">Terkirim</th>
             <th scope="col" class="px-5 py-3">Gagal</th>
             <th scope="col" class="px-5 py-3">Dibuat</th>
+            <th scope="col" class="px-5 py-3">
+              <span class="sr-only">Aksi</span>
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-line">
@@ -30,6 +33,13 @@
               <td class="px-5 py-4 tabular-nums">{{ campaign.sent_count }} / {{ campaign.total_count }}</td>
               <td class="px-5 py-4 tabular-nums">{{ campaign.failed_count }}</td>
               <td class="px-5 py-4 text-muted">{{ campaign.created_at|date:"j M Y, H:i" }}</td>
+              <td class="px-5 py-4 text-right">
+                <a href="{% url 'campaigns:delete' campaign.pk %}"
+                   class="inline-flex items-center gap-1 font-bold text-danger hover:underline">
+                  {% include "components/icon.html" with name="trash-2" class="size-4" %}
+                  Hapus<span class="sr-only"> {{ campaign.name }}</span>
+                </a>
+              </td>
             </tr>
           {% endfor %}
         </tbody>

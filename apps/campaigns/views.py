@@ -5,7 +5,7 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -122,6 +122,27 @@ class CampaignCancelView(MemberAreaMixin, OwnedQuerysetMixin, View):
         services.cancel_campaign(campaign, by=request.user)
         messages.success(request, "Kampanye dihentikan. Pesan yang belum terkirim dibatalkan.")
         return redirect(campaign)
+
+
+class CampaignDeleteView(MemberAreaMixin, OwnedQuerysetMixin, View):
+    """Konfirmasi (GET) lalu hapus (POST). Kampanye berjalan dihentikan dulu."""
+
+    owned_selector = selectors.campaigns_for
+    template_name = "pages/members/campaigns/confirm_delete.html"
+
+    def get(self, request, pk):
+        campaign = get_object_or_404(self.get_queryset(), pk=pk)
+        return render(
+            request,
+            self.template_name,
+            {"campaign": campaign, "member_section": "campaigns"},
+        )
+
+    def post(self, request, pk):
+        campaign = get_object_or_404(self.get_queryset(), pk=pk)
+        services.delete_campaign(campaign, by=request.user)
+        messages.success(request, f"Kampanye “{campaign.name}” dihapus.")
+        return redirect("campaigns:list")
 
 
 @method_decorator(csrf_exempt, name="dispatch")

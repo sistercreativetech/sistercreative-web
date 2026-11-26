@@ -11,4 +11,5 @@ urlpatterns = [
     path("<int:pk>/progres.json", views.CampaignProgressView.as_view(), name="progress"),
     path("<int:pk>/mulai/", views.CampaignStartView.as_view(), name="start"),
     path("<int:pk>/hentikan/", views.CampaignCancelView.as_view(), name="cancel"),
+    path("<int:pk>/hapus/", views.CampaignDeleteView.as_view(), name="delete"),
 ]

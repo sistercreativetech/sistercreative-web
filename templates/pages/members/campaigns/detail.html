@@ -142,6 +142,11 @@
           </button>
         </form>
       {% endif %}
+      <a href="{% url 'campaigns:delete' campaign.pk %}"
+         class="inline-flex min-h-11 items-center justify-center gap-2 rounded-button px-5 text-sm font-bold text-danger hover:bg-danger-soft">
+        {% include "components/icon.html" with name="trash-2" class="size-4" %}
+        Hapus kampanye
+      </a>
       <dl class="rounded-card bg-white p-6 text-sm">
         <dt class="text-muted">Dibuat</dt>
         <dd class="font-semibold">

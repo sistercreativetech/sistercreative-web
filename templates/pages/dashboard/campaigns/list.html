@@ -41,6 +41,9 @@
             <tr>
               <td class="px-5 py-4">
                 <span class="font-bold">{{ campaign.name }}</span>
+                {% if campaign.deleted_at %}
+                  <span class="ml-1 rounded-full bg-surface px-2 py-0.5 text-xs font-bold text-muted">Dihapus member</span>
+                {% endif %}
                 <div class="text-muted">{{ campaign.created_at|date:"j M Y, H:i" }}</div>
               </td>
               <td class="px-5 py-4">

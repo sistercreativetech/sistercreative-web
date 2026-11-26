@@ -15,7 +15,8 @@ def _with_counts(queryset: QuerySet[Campaign]) -> QuerySet[Campaign]:
 
 
 def campaigns_for(owner) -> QuerySet[Campaign]:
-    return Campaign.objects.filter(owner=owner)
+    """Kampanye milik member yang belum dihapus."""
+    return Campaign.objects.filter(owner=owner, deleted_at__isnull=True)
 
 
 def campaigns_with_counts(owner) -> QuerySet[Campaign]:

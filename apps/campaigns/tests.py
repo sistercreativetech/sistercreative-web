@@ -300,3 +300,69 @@ class AdminCampaignTests(CampaignTestCase):
         campaign = self.make_campaign()
         response = self.client.post(reverse("dashboard:campaign_cancel", args=[campaign.pk]))
         self.assertEqual(response.status_code, 403)
+
+
+class DeleteCampaignTests(CampaignTestCase):
+    def test_confirm_page_and_delete_hides_campaign(self):
+        campaign = self.make_campaign()
+        url = reverse("campaigns:delete", args=[campaign.pk])
+        self.assertContains(self.client.get(url), "Hapus kampanye")
+        self.assertRedirects(self.client.post(url), reverse("campaigns:list"))
+        campaign.refresh_from_db()
+        self.assertIsNotNone(campaign.deleted_at)
+        self.assertNotContains(self.client.get(reverse("campaigns:list")), "Pengingat")
+        self.assertEqual(self.client.get(campaign.get_absolute_url()).status_code, 404)
+
+    def test_deleting_queued_campaign_cancels_it_and_stops_n8n(self):
+        campaign = self.make_campaign()
+        campaign.status = Campaign.Status.QUEUED
+        campaign.save()
+        warning = self.client.get(reverse("campaigns:delete", args=[campaign.pk]))
+        self.assertContains(warning, "akan dihentikan")
+        self.client.post(reverse("campaigns:delete", args=[campaign.pk]))
+        campaign.refresh_from_db()
+        self.assertEqual(campaign.status, Campaign.Status.CANCELLED)
+        self.assertFalse(
+            campaign.recipients.filter(status=CampaignRecipient.Status.PENDING).exists()
+        )
+        recipient = campaign.recipients.first()
+        result = services.record_result(
+            {"campaign_id": campaign.pk, "recipient_id": recipient.pk, "status": "sent"}
+        )
+        self.assertFalse(result["continue"])
+
+    def test_deleted_campaign_still_counts_toward_quota(self):
+        campaign = self.make_campaign()
+        campaign.status = Campaign.Status.COMPLETED
+        campaign.save()
+        campaign.recipients.update(status=CampaignRecipient.Status.SENT, sent_at=timezone.now())
+        before = services.used_today(self.member)
+        services.delete_campaign(campaign, by=self.member)
+        self.assertEqual(services.used_today(self.member), before)
+        self.assertEqual(before, 2)
+
+    def test_cannot_delete_other_members_campaign(self):
+        campaign = self.make_campaign()
+        self.client.force_login(make_member("budi@contoh.id"))
+        url = reverse("campaigns:delete", args=[campaign.pk])
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.assertEqual(self.client.post(url).status_code, 404)
+        campaign.refresh_from_db()
+        self.assertIsNone(campaign.deleted_at)
+
+    def test_delete_requires_post(self):
+        campaign = self.make_campaign()
+        self.client.get(reverse("campaigns:delete", args=[campaign.pk]))
+        campaign.refresh_from_db()
+        self.assertIsNone(campaign.deleted_at)
+
+    def test_admin_still_sees_deleted_campaign(self):
+        campaign = self.make_campaign()
+        services.delete_campaign(campaign, by=self.member)
+        admin = User.objects.create_superuser(
+            email="admin@sistercreative.tech", password=PASSWORD, full_name="Admin"
+        )
+        self.client.force_login(admin)
+        response = self.client.get(reverse("dashboard:campaign_list"))
+        self.assertContains(response, "Pengingat")
+        self.assertContains(response, "Dihapus member")
