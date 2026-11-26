@@ -1,0 +1,15 @@
+# Pilihan B: Caddy memegang port 80/443 dan HTTPS sendiri (VPS tanpa reverse proxy lain).
+# docker compose -f docker-compose.prod.yml -f docker-compose.public.yml --env-file .env up -d --build
+services:
+  caddy:
+    ports: !override
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes: !override
+      - ./docker/Caddyfile.public:/etc/caddy/Caddyfile:ro
+      - media:/srv/media:ro
+      - caddy-data:/data

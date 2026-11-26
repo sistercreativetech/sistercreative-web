@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from apps.campaigns.views import CampaignCallbackView
+from apps.core.npl_proxy import NplAdminPageView, NplProxyView
 from apps.whatsapp.views import WahaWebhookView
 
 urlpatterns = [
@@ -17,6 +18,14 @@ urlpatterns = [
     path("api/webhooks/waha/", WahaWebhookView.as_view(), name="waha_webhook"),
     path("api/n8n/kampanye/hasil/", CampaignCallbackView.as_view(), name="campaign_callback"),
     path("portofolio/", include("apps.portfolio.urls")),
+    # Admin Ngaji Privat Lombok lama (halaman & API di n8n), path sama seperti Worker lama.
+    path("admin", NplAdminPageView.as_view()),
+    path("admin/", NplAdminPageView.as_view(), name="npl_admin"),
+    path("npl-admin/", NplAdminPageView.as_view()),
+    path("admin/api", NplProxyView.as_view()),
+    path("admin/api/", NplProxyView.as_view(), name="npl_admin_api"),
+    path("webhook/npl-admin-api", NplProxyView.as_view()),
+    path("webhook/npl-admin-api/", NplProxyView.as_view()),
     path("", include("apps.core.urls")),
 ]
 
