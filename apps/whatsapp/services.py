@@ -1,5 +1,6 @@
 """Logika sesi WhatsApp member dan event masuk dari WAHA."""
 
+import contextlib
 import logging
 
 from django.conf import settings
@@ -57,16 +58,36 @@ def refresh_status(session: WhatsAppSession) -> WhatsAppSession:
     return _apply_remote(session, waha.get_session(session.name))
 
 
+def _recover_failed(name: str) -> dict | None:
+    """Pulihkan sesi FAILED (mis. QR kedaluwarsa karena tidak di-scan).
+
+    Coba restart dulu; bila WAHA menolak, hentikan lalu nyalakan lagi.
+    """
+    try:
+        return waha.restart_session(name)
+    except waha.WahaError as exc:
+        logger.info("Restart sesi %s ditolak (%s), coba stop + start", name, exc)
+    with contextlib.suppress(waha.WahaError):  # mungkin memang sudah berhenti
+        waha.stop_session(name)
+    return waha.start_session(name)
+
+
 def connect(user) -> WhatsAppSession:
-    """Buat (atau nyalakan ulang) sesi WAHA milik member agar QR muncul."""
+    """Buat, nyalakan, atau pulihkan sesi WAHA milik member agar QR baru muncul."""
     session = get_or_init_session(user)
     remote = waha.get_session(session.name)
     if remote is None:
         remote = waha.create_session(session.name, webhook_url(), settings.WAHA_WEBHOOK_TOKEN)
-    elif remote.get("status") in {"STOPPED", "FAILED"}:
+    elif remote.get("status") == "STOPPED":
         remote = waha.start_session(session.name)
+    elif remote.get("status") == "FAILED":
+        remote = _recover_failed(session.name)
+    elif remote.get("status") == "SCAN_QR_CODE":
+        # QR macet/kedaluwarsa: restart agar WAHA membuat QR baru.
+        remote = waha.restart_session(session.name)
     cache.delete(groups_cache_key(user))
-    return _apply_remote(session, remote)
+    # Balasan restart/start kadang belum memuat status terbaru; ambil ulang.
+    return _apply_remote(session, waha.get_session(session.name) or remote)
 
 
 def disconnect(user) -> WhatsAppSession:

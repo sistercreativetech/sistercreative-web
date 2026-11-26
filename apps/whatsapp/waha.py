@@ -86,6 +86,14 @@ def start_session(name: str) -> dict:
     return _json("POST", f"/api/sessions/{_session_path(name)}/start")
 
 
+def restart_session(name: str) -> dict:
+    return _json("POST", f"/api/sessions/{_session_path(name)}/restart")
+
+
+def stop_session(name: str) -> dict:
+    return _json("POST", f"/api/sessions/{_session_path(name)}/stop")
+
+
 def logout_session(name: str) -> dict:
     return _json("POST", f"/api/sessions/{_session_path(name)}/logout")
 

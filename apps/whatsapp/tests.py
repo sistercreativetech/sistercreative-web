@@ -78,6 +78,57 @@ class SessionServiceTests(TestCase):
             services.connect(self.member)
         start.assert_called_once()
 
+    def test_connect_recovers_failed_session_with_restart(self):
+        with (
+            mock.patch.object(
+                waha,
+                "get_session",
+                side_effect=[{"status": "FAILED"}, {"status": "SCAN_QR_CODE"}],
+            ),
+            mock.patch.object(waha, "restart_session", return_value={}) as restart,
+            mock.patch.object(waha, "start_session") as start,
+        ):
+            session = services.connect(self.member)
+        restart.assert_called_once_with(session.name)
+        start.assert_not_called()
+        self.assertEqual(session.status, WhatsAppSession.Status.SCAN_QR_CODE)
+
+    def test_connect_failed_falls_back_to_stop_and_start(self):
+        with (
+            mock.patch.object(
+                waha,
+                "get_session",
+                side_effect=[{"status": "FAILED"}, {"status": "STARTING"}],
+            ),
+            mock.patch.object(
+                waha, "restart_session", side_effect=waha.WahaError("422", status=422)
+            ),
+            mock.patch.object(waha, "stop_session") as stop,
+            mock.patch.object(waha, "start_session", return_value={}) as start,
+        ):
+            session = services.connect(self.member)
+        stop.assert_called_once()
+        start.assert_called_once()
+        self.assertEqual(session.status, WhatsAppSession.Status.STARTING)
+
+    def test_connect_regenerates_stuck_qr(self):
+        with (
+            mock.patch.object(waha, "get_session", return_value={"status": "SCAN_QR_CODE"}),
+            mock.patch.object(waha, "restart_session", return_value={}) as restart,
+        ):
+            services.connect(self.member)
+        restart.assert_called_once()
+
+    def test_connect_leaves_working_session_alone(self):
+        with (
+            mock.patch.object(waha, "get_session", return_value={"status": "WORKING"}),
+            mock.patch.object(waha, "restart_session") as restart,
+            mock.patch.object(waha, "start_session") as start,
+        ):
+            services.connect(self.member)
+        restart.assert_not_called()
+        start.assert_not_called()
+
     def test_refresh_stores_connected_number(self):
         session = services.get_or_init_session(self.member)
         remote = {"status": "WORKING", "me": {"id": "6281234567890@c.us", "pushName": "Siti"}}
@@ -110,6 +161,17 @@ class SessionViewTests(TestCase):
             response = self.client.get(reverse("whatsapp:session"))
         self.assertContains(response, reverse("whatsapp:session_qr"))
         self.assertContains(response, 'data-status="SCAN_QR_CODE"')
+
+    def test_failed_session_offers_new_qr(self):
+        with mock.patch.object(waha, "get_session", return_value={"status": "FAILED"}):
+            response = self.client.get(reverse("whatsapp:session"))
+        self.assertContains(response, "kedaluwarsa")
+        self.assertContains(response, "Buat kode QR baru")
+
+    def test_scanning_page_offers_regenerate(self):
+        with mock.patch.object(waha, "get_session", return_value={"status": "SCAN_QR_CODE"}):
+            response = self.client.get(reverse("whatsapp:session"))
+        self.assertContains(response, "Buat ulang kode QR")
 
     def test_qr_proxy_uses_own_session_and_disables_cache(self):
         with mock.patch.object(waha, "get_qr_png", return_value=b"\x89PNG") as get_qr:
