@@ -4,10 +4,13 @@ from django.urls import reverse
 
 from apps.contacts.models import Contact, ContactGroup
 
+from .images import campaign_image_path
+
 
 class Campaign(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draf"
+        SCHEDULED = "scheduled", "Terjadwal"
         QUEUED = "queued", "Dalam antrean"
         RUNNING = "running", "Sedang mengirim"
         COMPLETED = "completed", "Selesai"
@@ -28,6 +31,13 @@ class Campaign(models.Model):
     contact_groups = models.ManyToManyField(
         ContactGroup, verbose_name="grup kontak", blank=True, related_name="campaigns"
     )
+    image = models.ImageField(
+        "gambar",
+        upload_to=campaign_image_path,
+        blank=True,
+        help_text="Dikirim dengan pesan sebagai keterangan.",
+    )
+    scheduled_at = models.DateTimeField("jadwal kirim", null=True, blank=True, db_index=True)
     skipped_opted_out = models.PositiveIntegerField(default=0)
     error = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -57,6 +67,10 @@ class Campaign(models.Model):
     @property
     def is_active(self) -> bool:
         return self.status in self.ACTIVE_STATUSES
+
+    @property
+    def can_be_started(self) -> bool:
+        return self.status in {self.Status.DRAFT, self.Status.SCHEDULED}
 
     @property
     def is_finished(self) -> bool:

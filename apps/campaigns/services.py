@@ -1,7 +1,7 @@
 """Logika kampanye: penerima, kuota, kirim ke n8n, dan status dari n8n."""
 
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 
 from django.conf import settings
 from django.db import transaction
@@ -25,6 +25,10 @@ Recipient = CampaignRecipient
 
 class CampaignError(Exception):
     """Kesalahan yang aman ditampilkan ke member."""
+
+
+class CampaignBusy(CampaignError):
+    """Masih ada kampanye lain milik member yang sedang berjalan."""
 
 
 # --- Kuota ----------------------------------------------------------------------
@@ -65,7 +69,8 @@ def target_contacts(owner, *, all_contacts: bool, groups) -> tuple[list[Contact]
 
 
 @transaction.atomic
-def create_campaign(owner, *, name, body, all_contacts, groups, wa_groups) -> Campaign:
+def create_campaign(owner, *, name, body, all_contacts, groups, wa_groups, image=None) -> Campaign:
+    """Buat draf beserta penerimanya. `image` = ContentFile hasil images.prepare_image."""
     contacts, skipped = target_contacts(owner, all_contacts=all_contacts, groups=groups)
     campaign = Campaign.objects.create(
         owner=owner,
@@ -73,6 +78,7 @@ def create_campaign(owner, *, name, body, all_contacts, groups, wa_groups) -> Ca
         body=body,
         send_to_all_contacts=all_contacts,
         skipped_opted_out=skipped,
+        image=image,
     )
     campaign.contact_groups.set(groups)
 
@@ -121,6 +127,7 @@ def build_payload(campaign: Campaign, session: WhatsAppSession) -> dict:
         "session": session.name,
         "delay_seconds": {"min": settings.BLAST_DELAY_MIN, "max": settings.BLAST_DELAY_MAX},
         "callback_url": settings.SITE_URL.rstrip("/") + reverse("campaign_callback"),
+        "image_url": (settings.SITE_URL.rstrip("/") + campaign.image.url) if campaign.image else "",
         "recipients": [
             {"recipient_id": r.pk, "chat_id": r.chat_id, "text": r.text}
             for r in pending.only("pk", "chat_id", "text")
@@ -128,15 +135,23 @@ def build_payload(campaign: Campaign, session: WhatsAppSession) -> dict:
     }
 
 
+def skip_opted_out(campaign: Campaign) -> int:
+    """Lewati kontak yang berhenti berlangganan sejak kampanye dibuat."""
+    return campaign.recipients.filter(
+        status=Recipient.Status.PENDING, contact__is_opted_out=True
+    ).update(status=Recipient.Status.SKIPPED, error="Berhenti berlangganan")
+
+
 def start_campaign(campaign: Campaign) -> Campaign:
     owner = campaign.owner
-    if campaign.status != Campaign.Status.DRAFT:
+    if not campaign.can_be_started:
         raise CampaignError("Kampanye ini sudah pernah dimulai.")
+    skip_opted_out(campaign)
     pending = campaign.recipients.filter(status=Recipient.Status.PENDING).count()
     if not pending:
         raise CampaignError("Tidak ada penerima untuk dikirimi.")
     if Campaign.objects.filter(owner=owner, status__in=Campaign.ACTIVE_STATUSES).exists():
-        raise CampaignError("Masih ada kampanye yang sedang berjalan. Tunggu sampai selesai.")
+        raise CampaignBusy("Masih ada kampanye yang sedang berjalan. Tunggu sampai selesai.")
     if pending > remaining_quota(owner):
         raise CampaignError(
             f"Kuota hari ini tersisa {remaining_quota(owner)} pesan, "
@@ -158,6 +173,83 @@ def start_campaign(campaign: Campaign) -> Campaign:
     campaign.error = ""
     campaign.save(update_fields=["status", "started_at", "error"])
     return campaign
+
+
+# --- Jadwal ----------------------------------------------------------------------
+
+
+def schedule_campaign(campaign: Campaign, when) -> Campaign:
+    if campaign.status not in {Campaign.Status.DRAFT, Campaign.Status.SCHEDULED}:
+        raise CampaignError("Hanya draf yang bisa dijadwalkan.")
+    now = timezone.now()
+    earliest = now + timedelta(minutes=settings.CAMPAIGN_SCHEDULE_MIN_MINUTES)
+    latest = now + timedelta(days=settings.CAMPAIGN_SCHEDULE_MAX_DAYS)
+    if when < earliest:
+        raise CampaignError(
+            f"Jadwal minimal {settings.CAMPAIGN_SCHEDULE_MIN_MINUTES} menit dari sekarang."
+        )
+    if when > latest:
+        raise CampaignError(f"Jadwal maksimal {settings.CAMPAIGN_SCHEDULE_MAX_DAYS} hari ke depan.")
+    if not campaign.recipients.filter(status=Recipient.Status.PENDING).exists():
+        raise CampaignError("Tidak ada penerima untuk dikirimi.")
+    campaign.status = Campaign.Status.SCHEDULED
+    campaign.scheduled_at = when
+    campaign.error = ""
+    campaign.save(update_fields=["status", "scheduled_at", "error"])
+    return campaign
+
+
+def unschedule_campaign(campaign: Campaign) -> Campaign:
+    if campaign.status != Campaign.Status.SCHEDULED:
+        raise CampaignError("Kampanye ini tidak sedang terjadwal.")
+    campaign.status = Campaign.Status.DRAFT
+    campaign.scheduled_at = None
+    campaign.save(update_fields=["status", "scheduled_at"])
+    return campaign
+
+
+@transaction.atomic
+def fail_campaign(campaign: Campaign, message: str) -> Campaign:
+    campaign.recipients.filter(status=Recipient.Status.PENDING).update(
+        status=Recipient.Status.SKIPPED, error="Kampanye gagal dimulai"
+    )
+    campaign.status = Campaign.Status.FAILED
+    campaign.error = message[:500]
+    campaign.finished_at = timezone.now()
+    campaign.save(update_fields=["status", "error", "finished_at"])
+    return campaign
+
+
+def dispatch_due_campaigns(now=None) -> dict:
+    """Dipanggil n8n tiap menit: mulai kampanye terjadwal yang sudah jatuh tempo."""
+    now = now or timezone.now()
+    grace = timedelta(minutes=settings.CAMPAIGN_SCHEDULE_GRACE_MINUTES)
+    result = {"started": 0, "deferred": 0, "failed": 0}
+    due = Campaign.objects.filter(
+        status=Campaign.Status.SCHEDULED,
+        scheduled_at__lte=now,
+        deleted_at__isnull=True,
+    ).order_by("scheduled_at", "pk")
+    for pk in list(due.values_list("pk", flat=True)):
+        try:
+            with transaction.atomic():
+                # Kunci baris agar panggilan pemicu yang tumpang-tindih tidak memulai dua kali.
+                campaign = Campaign.objects.select_for_update().get(pk=pk)
+                if campaign.status != Campaign.Status.SCHEDULED:
+                    continue
+                start_campaign(campaign)
+        except CampaignBusy as exc:
+            if now - campaign.scheduled_at <= grace:
+                result["deferred"] += 1
+                continue
+            fail_campaign(campaign, f"{exc} Jadwal dibatalkan setelah menunggu 2 jam.")
+            result["failed"] += 1
+        except CampaignError as exc:
+            fail_campaign(campaign, str(exc))
+            result["failed"] += 1
+        else:
+            result["started"] += 1
+    return result
 
 
 @transaction.atomic

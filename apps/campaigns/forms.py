@@ -1,8 +1,16 @@
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
+from django.utils import timezone
 
 from apps.contacts import messages as message_vars
 from apps.contacts.models import ContactGroup, MessageTemplate
+from apps.core.validators import ALLOWED_IMAGE_EXTENSIONS, validate_image_upload
+
+
+def validate_campaign_image(file):
+    validate_image_upload(file, max_bytes=settings.CAMPAIGN_IMAGE_MAX_BYTES)
 
 
 class CampaignForm(forms.Form):
@@ -26,6 +34,16 @@ class CampaignForm(forms.Form):
         help_text=(
             "Variabel: {nama}, {nama_depan}, {nomor}. Untuk grup WA, {nama} berisi nama grup."
         ),
+    )
+    image = forms.ImageField(
+        label="Gambar",
+        required=False,
+        validators=[FileExtensionValidator(ALLOWED_IMAGE_EXTENSIONS), validate_campaign_image],
+        help_text=(
+            "JPG, PNG, atau WebP, maks 5 MB. Isi pesan menjadi keterangan gambar "
+            "(maks 900 karakter). Gambar diperkecil otomatis."
+        ),
+        widget=forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png,image/webp"}),
     )
     send_to_all_contacts = forms.BooleanField(label="Kirim ke semua kontak saya", required=False)
     contact_groups = forms.ModelMultipleChoiceField(
@@ -67,6 +85,12 @@ class CampaignForm(forms.Form):
                     "Variabel tidak dikenal: " + ", ".join("{" + n + "}" for n in unknown),
                 )
         cleaned["body"] = body
+        if cleaned.get("image") and len(body) > settings.CAMPAIGN_CAPTION_MAX_CHARS:
+            self.add_error(
+                "body",
+                f"Dengan gambar, isi pesan maksimal {settings.CAMPAIGN_CAPTION_MAX_CHARS} karakter "
+                f"(sekarang {len(body)}).",
+            )
 
         if not (
             cleaned.get("send_to_all_contacts")
@@ -80,3 +104,17 @@ class CampaignForm(forms.Form):
 
     def selected_wa_groups(self) -> list[dict]:
         return [self.wa_group_map[gid] for gid in self.cleaned_data.get("wa_groups", [])]
+
+
+class CampaignScheduleForm(forms.Form):
+    scheduled_at = forms.DateTimeField(
+        label="Tanggal & jam kirim (WITA)",
+        input_formats=["%Y-%m-%dT%H:%M"],
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
+    )
+
+    def clean_scheduled_at(self):
+        value = self.cleaned_data["scheduled_at"]
+        if timezone.is_naive(value):
+            value = timezone.make_aware(value)
+        return value

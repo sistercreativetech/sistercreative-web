@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from apps.campaigns.views import CampaignCallbackView
+from apps.campaigns.views import CampaignCallbackView, ScheduledDispatchView
 from apps.core.npl_proxy import NplAdminPageView, NplProxyView
 from apps.whatsapp.views import WahaWebhookView
 
@@ -18,6 +18,7 @@ urlpatterns = [
     # Dipanggil server lain (bukan browser): dilindungi token header, tanpa CSRF.
     path("api/webhooks/waha/", WahaWebhookView.as_view(), name="waha_webhook"),
     path("api/n8n/kampanye/hasil/", CampaignCallbackView.as_view(), name="campaign_callback"),
+    path("api/n8n/kampanye/jadwal/", ScheduledDispatchView.as_view(), name="campaign_dispatch"),
     path("portofolio/", include("apps.portfolio.urls")),
     # Admin Ngaji Privat Lombok lama (halaman & API di n8n), path sama seperti Worker lama.
     path("admin", NplAdminPageView.as_view()),

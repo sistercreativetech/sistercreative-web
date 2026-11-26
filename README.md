@@ -152,7 +152,9 @@ docker compose -f docker-compose.prod.yml --env-file .env exec web python manage
 3. Buka workflow **"Sister Creative - Balas Otomatis (WAHA)"**:
    - node *Terima Balasan dari Django*: pilih credential Header Auth **yang sama** dengan workflow Blast (`X-SC-Token` = `N8N_BLAST_TOKEN`);
    - salin **Production URL** webhook ke `N8N_AUTOREPLY_WEBHOOK_URL`, lalu **aktifkan** workflow.
-4. Muat ulang website: `docker compose -f docker-compose.prod.yml --env-file .env up -d`.
+4. Workflow **"Sister Creative - Pemicu Kampanye Terjadwal"** (tiap menit memanggil `/api/n8n/kampanye/jadwal/`):
+   memakai credential Custom Auth yang sama dengan *Laporkan Hasil ke Django*; cukup **aktifkan**.
+5. Muat ulang website: `docker compose -f docker-compose.prod.yml --env-file .env up -d`.
 
 ### 7. Checklist setelah deploy
 
@@ -165,6 +167,8 @@ docker compose -f docker-compose.prod.yml --env-file .env exec web python manage
 - [ ] Member: menu WhatsApp → QR muncul → scan → status "Terhubung"
 - [ ] Kampanye uji ke 1–2 nomor sendiri → status "Terkirim" di detail kampanye
 - [ ] Balas **STOP** dari nomor uji → kontak berubah menjadi "Berhenti"
+- [ ] Kampanye dengan gambar → gambar + keterangan masuk di WhatsApp
+- [ ] Jadwalkan kampanye 10 menit ke depan → terkirim otomatis pada waktunya
 - [ ] Buat aturan balas otomatis, kirim kata kuncinya dari nomor lain → pesan ditandai dibaca, muncul "mengetik…", lalu balasan masuk
 - [ ] Reset kata sandi mengirim email (bila SMTP sudah diisi)
 

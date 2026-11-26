@@ -167,6 +167,14 @@ AUTO_REPLY_MAX_PER_HOUR = int(env("AUTO_REPLY_MAX_PER_HOUR", "30"))
 BLAST_DELAY_MIN = int(env("BLAST_DELAY_MIN", "8"))
 BLAST_DELAY_MAX = int(env("BLAST_DELAY_MAX", "20"))
 # Ditambahkan di akhir pesan ke kontak pribadi (tidak untuk grup WA).
+# Kampanye: gambar & jadwal.
+CAMPAIGN_IMAGE_MAX_BYTES = 5 * 1024 * 1024
+# Batas keterangan gambar WhatsApp 1024; sisakan ruang untuk nama & catatan STOP.
+CAMPAIGN_CAPTION_MAX_CHARS = 900
+CAMPAIGN_SCHEDULE_MIN_MINUTES = 5
+CAMPAIGN_SCHEDULE_MAX_DAYS = 30
+# Bila saat jadwal tiba masih ada kampanye lain berjalan, coba lagi sampai batas ini.
+CAMPAIGN_SCHEDULE_GRACE_MINUTES = 120
 OPT_OUT_FOOTER = "\n\n_Balas STOP untuk berhenti menerima pesan._"
 
 # --- Email ------------------------------------------------------------------

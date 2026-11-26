@@ -7,9 +7,9 @@ ALLOWED_IMAGE_FORMATS = {"JPEG", "PNG", "WEBP"}
 ALLOWED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
 
 
-def validate_image_upload(file):
+def validate_image_upload(file, max_bytes=None):
     """Batasi ukuran & tipe gambar. Format dicek dari isi file, bukan hanya ekstensi."""
-    limit = settings.MAX_IMAGE_UPLOAD_BYTES
+    limit = max_bytes or settings.MAX_IMAGE_UPLOAD_BYTES
     if file.size > limit:
         raise ValidationError(
             f"Ukuran gambar maksimal {filesizeformat(limit)}.", code="file_too_large"

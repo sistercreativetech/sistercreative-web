@@ -1,11 +1,13 @@
 import hmac
 import json
 import logging
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -17,7 +19,8 @@ from apps.whatsapp import waha
 from apps.whatsapp.models import WhatsAppSession
 
 from . import selectors, services
-from .forms import CampaignForm
+from .forms import CampaignForm, CampaignScheduleForm
+from .images import prepare_image
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +75,7 @@ class CampaignCreateView(MemberAreaMixin, FormView):
             all_contacts=data["send_to_all_contacts"],
             groups=data["contact_groups"],
             wa_groups=form.selected_wa_groups(),
+            image=prepare_image(data["image"]) if data.get("image") else None,
         )
         messages.info(self.request, "Kampanye disimpan sebagai draf. Periksa lalu mulai kirim.")
         return redirect(campaign)
@@ -90,7 +94,44 @@ class CampaignDetailView(MemberAreaMixin, OwnedQuerysetMixin, DetailView):
         context["sample"] = campaign.recipients.first()
         context["recipients"] = campaign.recipients.select_related("contact")[:200]
         context["remaining_quota"] = services.remaining_quota(self.request.user)
+        if campaign.status == campaign.Status.DRAFT:
+            default_time = timezone.localtime() + timedelta(hours=1)
+            context["schedule_form"] = kwargs.get("schedule_form") or CampaignScheduleForm(
+                initial={"scheduled_at": default_time.replace(second=0, microsecond=0)}
+            )
         return context
+
+
+class CampaignScheduleView(MemberAreaMixin, OwnedQuerysetMixin, View):
+    owned_selector = selectors.campaigns_for
+
+    def post(self, request, pk):
+        campaign = get_object_or_404(self.get_queryset(), pk=pk)
+        form = CampaignScheduleForm(request.POST)
+        if not form.is_valid():
+            messages.error(request, "Tanggal dan jam tidak valid.")
+            return redirect(campaign)
+        try:
+            services.schedule_campaign(campaign, form.cleaned_data["scheduled_at"])
+        except services.CampaignError as exc:
+            messages.error(request, str(exc))
+        else:
+            when = timezone.localtime(campaign.scheduled_at)
+            messages.success(request, f"Kampanye dijadwalkan {when:%d-%m-%Y %H.%M} WITA.")
+        return redirect(campaign)
+
+
+class CampaignUnscheduleView(MemberAreaMixin, OwnedQuerysetMixin, View):
+    owned_selector = selectors.campaigns_for
+
+    def post(self, request, pk):
+        campaign = get_object_or_404(self.get_queryset(), pk=pk)
+        try:
+            services.unschedule_campaign(campaign)
+            messages.success(request, "Jadwal dibatalkan. Kampanye kembali menjadi draf.")
+        except services.CampaignError as exc:
+            messages.error(request, str(exc))
+        return redirect(campaign)
 
 
 class CampaignProgressView(MemberAreaMixin, OwnedQuerysetMixin, View):
@@ -145,14 +186,28 @@ class CampaignDeleteView(MemberAreaMixin, OwnedQuerysetMixin, View):
         return redirect("campaigns:list")
 
 
+def _valid_n8n_token(request) -> bool:
+    expected = settings.N8N_CALLBACK_TOKEN
+    received = request.headers.get("X-SC-Token", "")
+    return bool(expected) and hmac.compare_digest(received, expected)
+
+
+@method_decorator(csrf_exempt, name="dispatch")
+class ScheduledDispatchView(View):
+    """Dipanggil workflow n8n "Pemicu Kampanye Terjadwal" tiap menit."""
+
+    def post(self, request):
+        if not _valid_n8n_token(request):
+            return HttpResponseForbidden("invalid token")
+        return JsonResponse({"ok": True, **services.dispatch_due_campaigns()})
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class CampaignCallbackView(View):
     """Callback n8n per penerima. Dilindungi token di header X-SC-Token."""
 
     def post(self, request):
-        expected = settings.N8N_CALLBACK_TOKEN
-        received = request.headers.get("X-SC-Token", "")
-        if not expected or not hmac.compare_digest(received, expected):
+        if not _valid_n8n_token(request):
             return HttpResponseForbidden("invalid token")
         try:
             payload = json.loads(request.body)

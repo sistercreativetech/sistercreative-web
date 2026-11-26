@@ -29,7 +29,10 @@
                 <a href="{{ campaign.get_absolute_url }}"
                    class="font-bold hover:text-primary">{{ campaign.name }}</a>
               </td>
-              <td class="px-5 py-4">{% include "components/campaign_status_badge.html" with campaign=campaign %}</td>
+              <td class="px-5 py-4">
+                {% include "components/campaign_status_badge.html" with campaign=campaign %}
+                {% if campaign.status == "scheduled" %}<span class="mt-1 block text-xs text-muted">{{ campaign.scheduled_at|date:"j M, H.i" }} WITA</span>{% endif %}
+              </td>
               <td class="px-5 py-4 tabular-nums">{{ campaign.sent_count }} / {{ campaign.total_count }}</td>
               <td class="px-5 py-4 tabular-nums">{{ campaign.failed_count }}</td>
               <td class="px-5 py-4 text-muted">{{ campaign.created_at|date:"j M Y, H:i" }}</td>
