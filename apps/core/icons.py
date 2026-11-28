@@ -10,6 +10,8 @@ ICONS = [
     "bell-off",
     "bot",
     "calendar-clock",
+    "mail",
+    "mail-x",
     "check",
     "chevron-left",
     "chevron-right",

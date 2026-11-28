@@ -1,0 +1,7 @@
+{% autoescape off %}{% for paragraph in paragraphs %}{{ paragraph }}
+
+{% endfor %}{% if button_url %}{{ button_label|default:"Buka link" }}: {{ button_url }}
+
+{% endif %}--
+{{ site_name }} · {{ site_url }}
+Tidak ingin menerima email ini lagi? Berhenti berlangganan: {{ unsubscribe_url }}{% endautoescape %}

@@ -7,9 +7,11 @@
   {% url 'dashboard:project_list' as project_url %}
   {% url 'dashboard:category_list' as category_url %}
   {% url 'dashboard:campaign_list' as campaign_url %}
+  {% url 'mailing:campaign_list' as mailing_url %}
   {% include "components/app_nav_link.html" with url=home_url label="Ringkasan" icon="layout-dashboard" section="home" current=dashboard_section %}
   {% include "components/app_nav_link.html" with url=member_url label="Member" icon="users" section="members" current=dashboard_section badge=pending_count badge_label="menunggu persetujuan" %}
   {% include "components/app_nav_link.html" with url=project_url label="Portofolio" icon="folder-kanban" section="projects" current=dashboard_section %}
   {% include "components/app_nav_link.html" with url=category_url label="Kategori" icon="tags" section="categories" current=dashboard_section %}
   {% include "components/app_nav_link.html" with url=campaign_url label="Kampanye" icon="send" section="campaigns" current=dashboard_section %}
+  {% include "components/app_nav_link.html" with url=mailing_url label="Blast email" icon="mail" section="mailing" current=dashboard_section %}
 {% endblock app_nav %}

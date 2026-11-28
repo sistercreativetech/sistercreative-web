@@ -1,0 +1,134 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Pelanggan email{% endblock page_title %}
+{% block content %}
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <h1 class="text-3xl font-extrabold">Blast email</h1>
+      <p class="mt-2 text-muted">Pelanggan yang berhenti berlangganan tidak akan dikirimi email lagi.</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <a href="{% url 'mailing:subscriber_import' %}"
+         class="inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-line bg-white px-5 font-bold hover:border-primary hover:text-primary">
+        {% include "components/icon.html" with name="upload" class="size-4" %}
+        Impor CSV
+      </a>
+      <a href="{% url 'mailing:subscriber_create' %}"
+         class="inline-flex min-h-11 items-center justify-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+        {% include "components/icon.html" with name="plus" class="size-4" %}
+        Tambah
+      </a>
+    </div>
+  </div>
+  {% include "components/mailing_tabs.html" with current="subscribers" %}
+  <form method="get"
+        aria-label="Saring pelanggan"
+        class="mb-6 flex flex-wrap items-end gap-3 rounded-card border border-line bg-white p-5">
+    <div class="flex min-w-48 flex-1 flex-col gap-1.5">
+      <label for="id_q" class="text-sm font-bold">Cari</label>
+      <input type="search"
+             name="q"
+             id="id_q"
+             value="{{ filters.query }}"
+             placeholder="Nama atau email">
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="id_daftar" class="text-sm font-bold">Daftar</label>
+      <select name="daftar" id="id_daftar">
+        <option value="">Semua daftar</option>
+        {% for item in lists %}
+          <option value="{{ item.pk }}"
+                  {% if filters.mailing_list.pk == item.pk %}selected{% endif %}>
+            {{ item.name }} ({{ item.subscribed_count }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <label for="id_status" class="text-sm font-bold">Status</label>
+      <select name="status" id="id_status">
+        <option value="">Semua status</option>
+        {% for value, label in status_choices %}
+          <option value="{{ value }}"
+                  {% if value == filters.status %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit"
+            class="inline-flex min-h-12 items-center rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+      Terapkan
+    </button>
+    {% if is_filtered %}
+      <a href="{% url 'mailing:subscriber_list' %}"
+         class="inline-flex min-h-12 items-center px-2 font-bold text-muted hover:text-primary">Reset</a>
+    {% endif %}
+  </form>
+  {% if subscribers %}
+    <p class="mb-3 text-sm text-muted">{{ paginator.count }} pelanggan</p>
+    <div class="overflow-x-auto rounded-card border border-line bg-white">
+      <table class="w-full min-w-[44rem] text-left text-sm">
+        <caption class="sr-only">Daftar pelanggan email</caption>
+        <thead class="border-b border-line bg-surface text-xs uppercase tracking-wider text-muted">
+          <tr>
+            <th scope="col" class="px-5 py-3">Pelanggan</th>
+            <th scope="col" class="px-5 py-3">Daftar</th>
+            <th scope="col" class="px-5 py-3">Terakhir dikirimi</th>
+            <th scope="col" class="px-5 py-3">
+              <span class="sr-only">Aksi</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          {% for subscriber in subscribers %}
+            <tr>
+              <td class="px-5 py-3">
+                <span class="font-semibold">{{ subscriber.name|default:"Tanpa nama" }}</span>
+                <span class="block text-muted">{{ subscriber.email }}</span>
+                {% if not subscriber.is_subscribed %}
+                  <span class="mt-1 inline-block rounded-full bg-danger-soft px-2 py-0.5 text-xs font-bold text-danger">Berhenti berlangganan</span>
+                {% endif %}
+              </td>
+              <td class="px-5 py-3 text-muted">
+                {% for item in subscriber.lists.all %}
+                  {{ item.name }}
+                  {% if not forloop.last %},{% endif %}
+                {% empty %}
+                  —
+                {% endfor %}
+              </td>
+              <td class="px-5 py-3 whitespace-nowrap text-muted">{{ subscriber.last_emailed_at|date:"j M Y"|default:"Belum pernah" }}</td>
+              <td class="px-5 py-3">
+                <div class="flex justify-end gap-4 text-sm font-bold">
+                  {% if subscriber.is_subscribed %}
+                    <form method="post"
+                          action="{% url 'mailing:subscriber_unsubscribe' subscriber.pk %}">
+                      {% csrf_token %}
+                      <button type="submit"
+                              class="inline-flex min-h-11 items-center gap-1 text-muted hover:text-danger hover:underline">
+                        {% include "components/icon.html" with name="mail-x" class="size-4" %}
+                        Berhentikan<span class="sr-only"> {{ subscriber.email }}</span>
+                      </button>
+                    </form>
+                  {% endif %}
+                  <a href="{% url 'mailing:subscriber_delete' subscriber.pk %}"
+                     class="inline-flex min-h-11 items-center gap-1 text-danger hover:underline">
+                    {% include "components/icon.html" with name="trash-2" class="size-4" %}
+                    Hapus<span class="sr-only"> {{ subscriber.email }}</span>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "components/pagination.html" with page_obj=page_obj querystring=filter_querystring %}
+  {% else %}
+    <p class="rounded-card border border-dashed border-line bg-white px-6 py-10 text-center text-muted">
+      {% if is_filtered %}
+        Tidak ada pelanggan yang cocok.
+      {% else %}
+        Belum ada pelanggan. Impor dari CSV untuk memulai.
+      {% endif %}
+    </p>
+  {% endif %}
+{% endblock content %}

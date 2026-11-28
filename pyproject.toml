@@ -21,3 +21,5 @@ indent = 2
 max_line_length = 120
 ignore = "H006,H030"
 custom_blocks = "element,slot,setvar"
+# Email butuh inline style (email client tidak membaca CSS eksternal).
+per-file-ignores = { "templates/emails/campaign.html" = "H021" }

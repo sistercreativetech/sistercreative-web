@@ -60,3 +60,8 @@
 - Follow-up (apps/followups): jeda langkah dihitung dari waktu chat masuk/didaftarkan. Pengiriman memakai workflow n8n
   "Blast WA Member" yang sama (callback ke /api/n8n/follow-up/hasil/), dipicu n8n berkala lewat /api/n8n/follow-up/jalankan/.
   Pesan follow-up dihitung dalam kuota harian (`campaigns.services.used_today`).
+- Blast email (apps/mailing): khusus admin di /dashboard/email/, audiens terpisah dari kontak member
+  (`Subscriber` + `MailingList`, email unik). Isi email teks biasa → template `templates/emails/` (satu-satunya tempat
+  inline style boleh). Django mengirim batch (EMAIL_BLAST_BATCH_SIZE, batas EMAIL_BLAST_DAILY_LIMIT/hari) ke workflow n8n
+  "Sister Creative - Blast Email" (SMTP Gmail), dipicu n8n tiap 10 menit lewat /api/n8n/email/jalankan/, hasil ke
+  /api/n8n/email/hasil/. Satu batch berjalan dalam satu waktu. Link berhenti langganan publik: /email/berhenti/<token>/.

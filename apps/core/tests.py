@@ -124,7 +124,11 @@ class TemplateConventionTests(SimpleTestCase):
         return [p for p in TEMPLATES_DIR.rglob("*.html") if "icons" not in p.parts]
 
     def test_no_inline_style(self):
+        # Template email (templates/emails/) wajib inline style karena email client tidak
+        # membaca CSS eksternal; aturan ini untuk halaman web.
         for path in self.templates():
+            if "emails" in path.parts:
+                continue
             self.assertNotRegex(path.read_text(encoding="utf-8"), r"\sstyle=", path.name)
 
     def test_no_script_outside_base(self):

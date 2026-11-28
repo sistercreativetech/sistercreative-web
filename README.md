@@ -66,6 +66,9 @@ Contoh lengkap ada di [.env.example](.env.example). Jangan pernah commit `.env`.
 | `N8N_BLAST_WEBHOOK_URL` | Production URL webhook workflow "Sister Creative - Blast WA Member (WAHA)" |
 | `N8N_BLAST_TOKEN`, `N8N_CALLBACK_TOKEN` | Dua token acak, harus sama dengan credential di workflow n8n |
 | `N8N_AUTOREPLY_WEBHOOK_URL` | Production URL webhook workflow "Sister Creative - Balas Otomatis (WAHA)" |
+| `N8N_EMAIL_WEBHOOK_URL` | Production URL webhook workflow "Sister Creative - Blast Email" |
+| `EMAIL_BLAST_FROM`, `EMAIL_BLAST_REPLY_TO` | Pengirim blast email; harus akun SMTP yang dipakai n8n (Gmail) |
+| `EMAIL_BLAST_DAILY_LIMIT`, `EMAIL_BLAST_BATCH_SIZE` | Batas email per hari (default 300; Gmail ±500) dan per putaran pemicu 10 menit (default 20) |
 | `AUTO_REPLY_MAX_PER_HOUR` | Batas balasan otomatis per member per jam, bawaan 30 (tidak memotong kuota blast) |
 | `BLAST_DELAY_MIN`, `BLAST_DELAY_MAX` | Jeda acak antar-pesan (detik), bawaan 8–20 |
 | `DEFAULT_DAILY_MESSAGE_QUOTA` | Kuota awal per member per hari, bawaan 100 |

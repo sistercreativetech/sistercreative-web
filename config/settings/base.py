@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "apps.campaigns",
     "apps.autoreply",
     "apps.followups",
+    "apps.mailing",
     "apps.members",
     "apps.dashboard",
 ]
@@ -180,6 +181,17 @@ OPT_OUT_FOOTER = "\n\n_Balas STOP untuk berhenti menerima pesan._"
 # Follow-up: maksimal pesan per member dalam satu putaran pemicu n8n.
 FOLLOWUP_BATCH_SIZE = int(env("FOLLOWUP_BATCH_SIZE", "20"))
 FOLLOWUP_MAX_STEPS = 5
+# Blast email (khusus admin) lewat workflow n8n "Blast Email" (SMTP Gmail di n8n).
+N8N_EMAIL_WEBHOOK_URL = env("N8N_EMAIL_WEBHOOK_URL", "")
+EMAIL_BLAST_FROM = env("EMAIL_BLAST_FROM", "Sister Creative <sistercreative.tech@gmail.com>")
+EMAIL_BLAST_REPLY_TO = env("EMAIL_BLAST_REPLY_TO", "")
+# Gmail membatasi ~500 email/hari per akun; sisakan untuk email lain (reset sandi, dll.).
+EMAIL_BLAST_DAILY_LIMIT = int(env("EMAIL_BLAST_DAILY_LIMIT", "300"))
+EMAIL_BLAST_BATCH_SIZE = int(env("EMAIL_BLAST_BATCH_SIZE", "20"))
+EMAIL_BLAST_DELAY_MIN = int(env("EMAIL_BLAST_DELAY_MIN", "15"))
+EMAIL_BLAST_DELAY_MAX = int(env("EMAIL_BLAST_DELAY_MAX", "30"))
+EMAIL_BLAST_QUEUE_TIMEOUT_MINUTES = 60
+EMAIL_IMPORT_MAX_ROWS = 10000
 
 # --- Email ------------------------------------------------------------------
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")

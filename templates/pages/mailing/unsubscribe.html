@@ -1,0 +1,29 @@
+{% extends "layouts/auth.html" %}
+{% block title %}Berhenti berlangganan — {{ site_name }}{% endblock title %}
+{% block content %}
+  <span class="grid size-12 place-items-center rounded-xl bg-primary-soft text-primary">
+    {% include "components/icon.html" with name="mail-x" class="size-6" %}
+  </span>
+  {% if done or not subscriber.is_subscribed %}
+    <h1 class="mt-5 text-2xl font-extrabold">Anda sudah berhenti berlangganan</h1>
+    <p class="mt-2 text-muted">
+      Email <strong class="text-ink">{{ subscriber.email }}</strong> tidak akan menerima email promosi dari {{ site_name }} lagi.
+    </p>
+    <a href="{% url 'core:home' %}"
+       class="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-button border border-line px-5 font-bold hover:border-primary hover:text-primary">
+      Ke beranda {{ site_name }}
+    </a>
+  {% else %}
+    <h1 class="mt-5 text-2xl font-extrabold">Berhenti menerima email?</h1>
+    <p class="mt-2 text-muted">
+      Email <strong class="text-ink">{{ subscriber.email }}</strong> tidak akan dikirimi email dari {{ site_name }} lagi.
+    </p>
+    <form method="post" class="mt-6">
+      {% csrf_token %}
+      <button type="submit"
+              class="inline-flex min-h-12 w-full items-center justify-center rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+        Ya, berhenti berlangganan
+      </button>
+    </form>
+  {% endif %}
+{% endblock content %}

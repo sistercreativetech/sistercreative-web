@@ -6,11 +6,13 @@ from django.urls import include, path
 from apps.campaigns.views import CampaignCallbackView, ScheduledDispatchView
 from apps.core.npl_proxy import NplAdminPageView, NplProxyView
 from apps.followups.views import FollowUpCallbackView, FollowUpDispatchView
+from apps.mailing.views import EmailCallbackView, EmailDispatchView, UnsubscribeView
 from apps.whatsapp.views import WahaWebhookView
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path("akun/", include("allauth.urls")),
+    path("dashboard/email/", include("apps.mailing.urls")),
     path("dashboard/", include("apps.dashboard.urls")),
     path("member/whatsapp/", include("apps.whatsapp.urls")),
     path("member/kampanye/", include("apps.campaigns.urls")),
@@ -23,6 +25,9 @@ urlpatterns = [
     path("api/n8n/kampanye/jadwal/", ScheduledDispatchView.as_view(), name="campaign_dispatch"),
     path("api/n8n/follow-up/jalankan/", FollowUpDispatchView.as_view(), name="followup_dispatch"),
     path("api/n8n/follow-up/hasil/", FollowUpCallbackView.as_view(), name="followup_callback"),
+    path("api/n8n/email/jalankan/", EmailDispatchView.as_view(), name="mailing_dispatch"),
+    path("api/n8n/email/hasil/", EmailCallbackView.as_view(), name="mailing_callback"),
+    path("email/berhenti/<uuid:token>/", UnsubscribeView.as_view(), name="mailing_unsubscribe"),
     path("portofolio/", include("apps.portfolio.urls")),
     # Admin Ngaji Privat Lombok lama (halaman & API di n8n), path sama seperti Worker lama.
     path("admin", NplAdminPageView.as_view()),

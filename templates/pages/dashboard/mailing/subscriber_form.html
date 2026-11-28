@@ -1,0 +1,36 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}Tambah pelanggan email{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'mailing:subscriber_list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Semua pelanggan
+  </a>
+  <h1 class="mb-8 text-3xl font-extrabold">Tambah pelanggan email</h1>
+  <form method="post"
+        class="flex max-w-xl flex-col gap-5 rounded-card border border-line bg-white p-6 md:p-8"
+        novalidate>
+    {% csrf_token %}
+    {% include "components/form_non_field_errors.html" %}
+    {% include "components/form_field.html" with field=form.email %}
+    {% include "components/form_field.html" with field=form.name %}
+    <fieldset class="flex flex-col gap-2">
+      <legend class="mb-1 text-sm font-bold">
+        Daftar <span class="font-normal text-muted">(opsional)</span>
+      </legend>
+      {% for checkbox in form.lists %}
+        <label class="flex items-center gap-2.5 text-sm">
+          {{ checkbox.tag }}
+          {{ checkbox.choice_label }}
+        </label>
+      {% empty %}
+        <p class="text-sm text-muted">Belum ada daftar.</p>
+      {% endfor %}
+    </fieldset>
+    <p class="text-sm text-muted">Tambahkan hanya orang yang sudah setuju menerima email dari Sister Creative.</p>
+    <button type="submit"
+            class="inline-flex min-h-12 items-center justify-center rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+      Simpan pelanggan
+    </button>
+  </form>
+{% endblock content %}

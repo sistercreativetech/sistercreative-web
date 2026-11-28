@@ -1,0 +1,16 @@
+{% comment %}Tab halaman blast email. Pakai: {% include "components/mailing_tabs.html" with current="campaigns" %}{% endcomment %}
+<nav aria-label="Menu blast email"
+     class="mb-6 flex gap-2 border-b border-line">
+  <a href="{% url 'mailing:campaign_list' %}"
+     class="-mb-px inline-flex min-h-11 items-center gap-2 border-b-2 px-3 text-sm font-bold {% if current == 'campaigns' %}border-primary text-primary{% else %}border-transparent text-muted hover:text-ink{% endif %}"
+     {% if current == 'campaigns' %}aria-current="page"{% endif %}>
+    {% include "components/icon.html" with name="send" class="size-4" %}
+    Kampanye
+  </a>
+  <a href="{% url 'mailing:subscriber_list' %}"
+     class="-mb-px inline-flex min-h-11 items-center gap-2 border-b-2 px-3 text-sm font-bold {% if current == 'subscribers' %}border-primary text-primary{% else %}border-transparent text-muted hover:text-ink{% endif %}"
+     {% if current == 'subscribers' %}aria-current="page"{% endif %}>
+    {% include "components/icon.html" with name="users" class="size-4" %}
+    Pelanggan
+  </a>
+</nav>

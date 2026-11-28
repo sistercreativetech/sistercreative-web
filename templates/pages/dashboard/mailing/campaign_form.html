@@ -1,0 +1,81 @@
+{% extends "layouts/dashboard.html" %}
+{% block page_title %}
+  {% if object %}
+    Ubah kampanye email
+  {% else %}
+    Buat kampanye email
+  {% endif %}
+{% endblock page_title %}
+{% block content %}
+  <a href="{% if object %}{{ object.get_absolute_url }}{% else %}{% url 'mailing:campaign_list' %}{% endif %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    {% if object %}
+      {{ object.name }}
+    {% else %}
+      Semua kampanye email
+    {% endif %}
+  </a>
+  <h1 class="mb-8 text-3xl font-extrabold">
+    {% if object %}
+      Ubah kampanye email
+    {% else %}
+      Buat kampanye email
+    {% endif %}
+  </h1>
+  <form method="post" class="grid gap-6 lg:grid-cols-[1fr_22rem]" novalidate>
+    {% csrf_token %}
+    <div class="flex flex-col gap-6">
+      {% include "components/form_non_field_errors.html" %}
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="content-title">
+        <h2 id="content-title" class="text-lg font-bold">Isi email</h2>
+        {% include "components/form_field.html" with field=form.name %}
+        {% include "components/form_field.html" with field=form.subject %}
+        {% include "components/form_field.html" with field=form.body %}
+        <div class="grid gap-5 sm:grid-cols-2">
+          {% include "components/form_field.html" with field=form.button_label %}
+          {% include "components/form_field.html" with field=form.button_url %}
+        </div>
+      </section>
+    </div>
+    <div class="flex flex-col gap-6">
+      <section class="flex flex-col gap-5 rounded-card border border-line bg-white p-6"
+               aria-labelledby="target-title">
+        <h2 id="target-title" class="text-lg font-bold">Penerima</h2>
+        {% include "components/form_field.html" with field=form.send_to_all %}
+        <fieldset class="flex flex-col gap-2">
+          <legend class="mb-1 text-sm font-bold">Atau pilih daftar</legend>
+          {% for checkbox in form.lists %}
+            <label class="flex items-center gap-2.5 text-sm">
+              {{ checkbox.tag }}
+              {{ checkbox.choice_label }}
+            </label>
+          {% empty %}
+            <p class="text-sm text-muted">
+              Belum ada daftar. Buat saat <a href="{% url 'mailing:subscriber_import' %}"
+                                             class="font-bold text-primary hover:underline">impor pelanggan</a>.
+            </p>
+          {% endfor %}
+        </fieldset>
+        {% include "components/form_field.html" with field=form.skip_recent_days %}
+        <button type="submit"
+                class="inline-flex min-h-12 items-center justify-center rounded-button bg-primary px-5 font-extrabold text-white shadow-primary hover:bg-primary-dark">
+          Simpan draf
+        </button>
+        <p class="text-sm text-muted">Email belum dikirim. Anda bisa melihat pratinjau dan mengirim email uji dulu.</p>
+      </section>
+      <aside class="rounded-card bg-white p-6 text-sm" aria-labelledby="var-title">
+        <h2 id="var-title" class="font-bold">Variabel</h2>
+        <ul class="mt-3 flex flex-col gap-1.5 text-muted">
+          {% for name, description in variables.items %}
+            <li>
+              <code class="font-bold text-ink">{{ "{" }}{{ name }}{{ "}" }}</code> — {{ description }}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="mt-3 text-muted">Pelanggan tanpa nama disapa “Bapak/Ibu”.</p>
+      </aside>
+    </div>
+  </form>
+{% endblock content %}

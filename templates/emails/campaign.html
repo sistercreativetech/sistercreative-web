@@ -1,0 +1,93 @@
+{% comment %}
+  Template email kampanye. Email client tidak mendukung CSS eksternal/kelas, jadi gaya
+  ditulis inline (pengecualian aturan "tanpa inline style" yang berlaku untuk halaman web).
+  Warna = nilai token @theme: ink #17131f, muted #6d6876, surface #f7f5fb, line #e7e1ee,
+  primary #6d28d9.
+{% endcomment %}
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ subject }}</title>
+  </head>
+  <body style="margin:0;
+               padding:0;
+               background-color:#f7f5fb;
+               font-family:'Open Sans',Arial,Helvetica,sans-serif;
+               color:#17131f">
+    <table role="presentation"
+           width="100%"
+           cellspacing="0"
+           cellpadding="0"
+           border="0"
+           style="background-color:#f7f5fb">
+      <tr>
+        <td align="center" style="padding:24px 12px;">
+          <table role="presentation"
+                 width="100%"
+                 cellspacing="0"
+                 cellpadding="0"
+                 border="0"
+                 style="max-width:600px;
+                        background-color:#ffffff;
+                        border:1px solid #e7e1ee;
+                        border-radius:12px">
+            <tr>
+              <td style="padding:32px 28px;
+                         font-size:16px;
+                         line-height:1.7;
+                         color:#17131f">
+                {% for paragraph in paragraphs %}
+                  <p style="margin:0 0 16px 0;">{{ paragraph|urlize|linebreaksbr }}</p>
+                {% endfor %}
+                {% if button_url %}
+                  <table role="presentation"
+                         cellspacing="0"
+                         cellpadding="0"
+                         border="0"
+                         style="margin:28px auto">
+                    <tr>
+                      <td align="center" style="background-color:#6d28d9;border-radius:8px;">
+                        <a href="{{ button_url }}"
+                           target="_blank"
+                           rel="noopener"
+                           style="display:inline-block;
+                                  padding:14px 32px;
+                                  font-size:15px;
+                                  font-weight:bold;
+                                  color:#ffffff;
+                                  text-decoration:none;
+                                  border-radius:8px">{{ button_label|default:"Buka link" }}</a>
+                      </td>
+                    </tr>
+                  </table>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+          <table role="presentation"
+                 width="100%"
+                 cellspacing="0"
+                 cellpadding="0"
+                 border="0"
+                 style="max-width:600px">
+            <tr>
+              <td align="center"
+                  style="padding:20px 12px;
+                         font-size:12px;
+                         line-height:1.6;
+                         color:#6d6876">
+                Email ini dikirim oleh {{ site_name }} karena Anda pernah mendaftar atau menghubungi kami.
+                <br>
+                <a href="{{ unsubscribe_url }}"
+                   style="color:#6d6876;
+                          text-decoration:underline">Berhenti berlangganan</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
