@@ -1,0 +1,100 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}Follow-up otomatis{% endblock page_title %}
+{% block content %}
+  {% url 'followups:sequence_create' as create_url %}
+  {% include "components/page_header.html" with title="Follow-up otomatis" intro="Sapa lagi customer yang sudah chat, misalnya 1 hari, 3 hari, dan 7 hari kemudian, tanpa perlu mengingat-ingat." action_url=create_url action_label="Buat urutan" %}
+  <div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+    <div>
+      {% if sequences %}
+        <ul class="flex flex-col gap-4">
+          {% for sequence in sequences %}
+            <li class="rounded-card border border-line bg-white p-6">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 class="text-lg font-bold">
+                    <a href="{{ sequence.get_absolute_url }}"
+                       class="hover:text-primary hover:underline">{{ sequence.name }}</a>
+                  </h2>
+                  <p class="mt-1 text-sm text-muted">
+                    {{ sequence.get_trigger_display }}
+                    {% if sequence.trigger == "keyword" %}
+                      :
+                      {% for word in sequence.keyword_list %}
+                        <span class="ml-1 inline-block rounded-full bg-primary-soft px-2 py-0.5 text-xs font-bold text-primary">{{ word }}</span>
+                      {% endfor %}
+                    {% endif %}
+                  </p>
+                </div>
+                {% if sequence.is_active %}
+                  {% include "components/status_badge.html" with status="active" label="Aktif" %}
+                {% else %}
+                  {% include "components/status_badge.html" with status="draft" label="Nonaktif" %}
+                {% endif %}
+              </div>
+              <dl class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                <div class="rounded-button bg-surface p-3">
+                  <dt class="text-muted">Langkah</dt>
+                  <dd class="text-lg font-extrabold tabular-nums">
+                    {{ sequence.step_count }}
+                  </dd>
+                </div>
+                <div class="rounded-button bg-surface p-3">
+                  <dt class="text-muted">Berjalan</dt>
+                  <dd class="text-lg font-extrabold tabular-nums">
+                    {{ sequence.active_count }}
+                  </dd>
+                </div>
+                <div class="rounded-button bg-surface p-3">
+                  <dt class="text-muted">Total chat</dt>
+                  <dd class="text-lg font-extrabold tabular-nums">
+                    {{ sequence.total_count }}
+                  </dd>
+                </div>
+              </dl>
+              {% if not sequence.step_count %}
+                <p class="mt-4 rounded-button bg-warning-soft p-3 text-sm font-semibold text-warning">
+                  Belum ada langkah, jadi urutan ini belum mengirim apa pun.
+                </p>
+              {% endif %}
+              <div class="mt-4 flex flex-wrap justify-end gap-4 text-sm font-bold">
+                <a href="{{ sequence.get_absolute_url }}"
+                   class="inline-flex items-center gap-1 text-primary hover:underline">
+                  {% include "components/icon.html" with name="eye" class="size-4" %}
+                  Kelola<span class="sr-only"> {{ sequence.name }}</span>
+                </a>
+                <a href="{% url 'followups:sequence_delete' sequence.pk %}"
+                   class="inline-flex items-center gap-1 text-danger hover:underline">
+                  {% include "components/icon.html" with name="trash-2" class="size-4" %}
+                  Hapus<span class="sr-only"> {{ sequence.name }}</span>
+                </a>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="rounded-card border border-dashed border-line bg-white px-6 py-12 text-center">
+          <p class="text-lg font-bold">Belum ada urutan follow-up</p>
+          <p class="mt-2 text-muted">
+            Contoh: customer yang bertanya “harga” disapa lagi 1 hari kemudian, lalu 7 hari kemudian bila belum membalas.
+          </p>
+          <a href="{{ create_url }}"
+             class="mt-6 inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-5 font-extrabold text-white hover:bg-primary-dark">
+            {% include "components/icon.html" with name="plus" class="size-4" %}
+            Buat urutan
+          </a>
+        </div>
+      {% endif %}
+    </div>
+    <aside class="self-start rounded-card bg-white p-6 text-sm"
+           aria-labelledby="how-title">
+      <h2 id="how-title" class="font-bold">Cara kerja</h2>
+      <ul class="mt-3 flex list-disc flex-col gap-1.5 pl-5 text-muted">
+        <li>Waktu tiap langkah dihitung dari saat customer pertama kali chat (atau saat didaftarkan manual).</li>
+        <li>Pesan hanya dikirim pada jam kirim yang Anda tentukan, dengan jeda acak dan tanda “sedang mengetik…”.</li>
+        <li>Bila customer membalas setelah follow-up terkirim, langkah berikutnya dibatalkan (bisa diatur).</li>
+        <li>Customer yang membalas STOP tidak dikirimi lagi. Grup WhatsApp tidak ikut follow-up.</li>
+        <li>Follow-up memakai kuota pesan harian. Sisa kuota hari ini: <strong class="text-ink">{{ remaining_quota }}</strong>.</li>
+      </ul>
+    </aside>
+  </div>
+{% endblock content %}

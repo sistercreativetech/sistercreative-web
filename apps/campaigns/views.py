@@ -1,9 +1,7 @@
-import hmac
 import json
 import logging
 from datetime import timedelta
 
-from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -13,6 +11,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, FormView, ListView
 
+from apps.core import n8n
 from apps.members.mixins import MemberAreaMixin, OwnedQuerysetMixin
 from apps.whatsapp import services as wa_services
 from apps.whatsapp import waha
@@ -187,9 +186,7 @@ class CampaignDeleteView(MemberAreaMixin, OwnedQuerysetMixin, View):
 
 
 def _valid_n8n_token(request) -> bool:
-    expected = settings.N8N_CALLBACK_TOKEN
-    received = request.headers.get("X-SC-Token", "")
-    return bool(expected) and hmac.compare_digest(received, expected)
+    return n8n.valid_callback_token(request)
 
 
 @method_decorator(csrf_exempt, name="dispatch")

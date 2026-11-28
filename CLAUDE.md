@@ -57,3 +57,6 @@
 - Data milik member (kontak, grup, template, nanti kampanye): selalu pakai `OwnedQuerysetMixin` + `owned_selector`
   dan `OwnerFormMixin` (apps/members/mixins.py), sehingga data member lain menghasilkan 404. Ada test IDOR yang wajib ikut diperluas.
 - Ikon: parameter aksesibelnya `icon_label` (bukan `label`) agar variabel komponen luar tidak bocor.
+- Follow-up (apps/followups): jeda langkah dihitung dari waktu chat masuk/didaftarkan. Pengiriman memakai workflow n8n
+  "Blast WA Member" yang sama (callback ke /api/n8n/follow-up/hasil/), dipicu n8n berkala lewat /api/n8n/follow-up/jalankan/.
+  Pesan follow-up dihitung dalam kuota harian (`campaigns.services.used_today`).

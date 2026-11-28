@@ -134,11 +134,19 @@ def handle_event(event: dict) -> str:
             return "ignored"
         sender = payload.get("from") or ""
         text = (payload.get("body") or "").strip().upper()
+        # Impor lokal untuk menghindari impor melingkar.
+        from apps.followups import services as followups
+
         if text not in STOP_KEYWORDS:
-            # Bukan STOP: serahkan ke balas otomatis (impor lokal untuk hindari impor melingkar).
+            # Bukan STOP: follow-up (berhenti bila dibalas / daftar urutan), lalu balas otomatis.
+            try:
+                followups.handle_incoming(session, payload)
+            except Exception:
+                logger.exception("Gagal memproses follow-up untuk %s", session.name)
             from apps.autoreply.services import handle_incoming
 
             return handle_incoming(session, payload)
+        followups.stop_for_chat(session.owner, sender, followups.Enrollment.StopReason.OPTED_OUT)
         if not sender.endswith("@c.us"):
             return "ignored"
         phone = sender.split("@")[0]

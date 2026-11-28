@@ -12,6 +12,7 @@ from django.utils import timezone
 from apps.contacts.messages import render_message
 from apps.contacts.models import Contact
 from apps.core import n8n
+from apps.followups.selectors import messages_used_since
 from apps.whatsapp import services as wa_services
 from apps.whatsapp import waha
 from apps.whatsapp.models import WhatsAppSession
@@ -40,15 +41,17 @@ def start_of_today():
 
 
 def used_today(owner) -> int:
-    """Pesan terkirim hari ini + pesan yang masih antre di kampanye aktif."""
-    return (
+    """Pesan terkirim hari ini + pesan yang masih antre (kampanye aktif dan follow-up)."""
+    since = start_of_today()
+    campaign_messages = (
         Recipient.objects.filter(campaign__owner=owner)
         .filter(
-            Q(status=Recipient.Status.SENT, sent_at__gte=start_of_today())
+            Q(status=Recipient.Status.SENT, sent_at__gte=since)
             | Q(status=Recipient.Status.PENDING, campaign__status__in=Campaign.ACTIVE_STATUSES)
         )
         .count()
     )
+    return campaign_messages + messages_used_since(owner, since)
 
 
 def remaining_quota(owner) -> int:

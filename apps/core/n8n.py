@@ -1,5 +1,6 @@
 """Kirim pekerjaan ke webhook n8n (blast, balas otomatis) dengan token header."""
 
+import hmac
 import json
 import logging
 import urllib.error
@@ -39,3 +40,10 @@ def post_job(url: str, payload: dict) -> None:
     except (urllib.error.URLError, TimeoutError) as exc:
         logger.warning("n8n tidak bisa dihubungi: %s", exc)
         raise N8nError("n8n tidak bisa dihubungi") from exc
+
+
+def valid_callback_token(request) -> bool:
+    """Panggilan dari n8n ke Django membawa header X-SC-Token = N8N_CALLBACK_TOKEN."""
+    expected = settings.N8N_CALLBACK_TOKEN
+    received = request.headers.get("X-SC-Token", "")
+    return bool(expected) and hmac.compare_digest(received, expected)

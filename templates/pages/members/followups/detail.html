@@ -1,0 +1,201 @@
+{% extends "layouts/member.html" %}
+{% block page_title %}{{ sequence.name }}{% endblock page_title %}
+{% block content %}
+  <a href="{% url 'followups:sequence_list' %}"
+     class="mb-4 inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-primary">
+    {% include "components/icon.html" with name="chevron-left" class="size-4" %}
+    Semua urutan
+  </a>
+  <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-3xl font-extrabold">{{ sequence.name }}</h1>
+        {% if sequence.is_active %}
+          {% include "components/status_badge.html" with status="active" label="Aktif" %}
+        {% else %}
+          {% include "components/status_badge.html" with status="draft" label="Nonaktif" %}
+        {% endif %}
+      </div>
+      <p class="mt-2 text-muted">
+        {{ sequence.get_trigger_display }}{% if sequence.trigger == "keyword" %}: {{ sequence.keywords }}{% endif %}
+        · jam kirim {{ sequence.send_from|time:"H.i" }}–{{ sequence.send_until|time:"H.i" }} WITA
+        {% if sequence.stop_on_reply %}· berhenti bila dibalas{% endif %}
+      </p>
+    </div>
+    <a href="{% url 'followups:sequence_update' sequence.pk %}"
+       class="inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-line px-5 font-bold hover:border-primary hover:text-primary">
+      {% include "components/icon.html" with name="pencil" class="size-4" %}
+      Ubah pengaturan
+    </a>
+  </div>
+  <div class="grid gap-6 lg:grid-cols-[1fr_22rem]">
+    <div class="flex flex-col gap-6">
+      <section class="rounded-card border border-line bg-white p-6"
+               aria-labelledby="steps-title">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="steps-title" class="text-lg font-bold">Langkah ({{ steps|length }}/{{ max_steps }})</h2>
+          {% if steps|length < max_steps %}
+            <a href="{% url 'followups:step_create' sequence.pk %}"
+               class="inline-flex min-h-11 items-center gap-2 rounded-button bg-primary px-4 font-extrabold text-white hover:bg-primary-dark">
+              {% include "components/icon.html" with name="plus" class="size-4" %}
+              Tambah langkah
+            </a>
+          {% endif %}
+        </div>
+        {% if steps %}
+          <ol class="mt-5 flex flex-col gap-4">
+            {% for step in steps %}
+              <li class="rounded-button border border-line p-4">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <p class="inline-flex items-center gap-2 font-bold">
+                    <span class="grid size-7 place-items-center rounded-full bg-primary-soft text-sm text-primary">{{ forloop.counter }}</span>
+                    {{ step.delay_label }} setelah chat
+                  </p>
+                  <div class="flex gap-4 text-sm font-bold">
+                    <a href="{% url 'followups:step_update' step.pk %}"
+                       class="inline-flex items-center gap-1 text-primary hover:underline">
+                      {% include "components/icon.html" with name="pencil" class="size-4" %}
+                      Ubah<span class="sr-only"> langkah {{ forloop.counter }}</span>
+                    </a>
+                    <a href="{% url 'followups:step_delete' step.pk %}"
+                       class="inline-flex items-center gap-1 text-danger hover:underline">
+                      {% include "components/icon.html" with name="trash-2" class="size-4" %}
+                      Hapus<span class="sr-only"> langkah {{ forloop.counter }}</span>
+                    </a>
+                  </div>
+                </div>
+                <div class="mt-3 flex flex-col gap-3 sm:flex-row">
+                  {% if step.image %}
+                    <img src="{{ step.image.url }}"
+                         alt="Gambar yang dikirim pada langkah {{ forloop.counter }}"
+                         class="h-24 w-24 shrink-0 rounded-button object-cover"
+                         loading="lazy">
+                  {% endif %}
+                  <p class="line-clamp-4 flex-1 whitespace-pre-line rounded-button bg-success-soft p-3 text-sm">{{ step.body }}</p>
+                </div>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="mt-5 rounded-button border border-dashed border-line px-4 py-8 text-center text-muted">
+            Belum ada langkah. Tambahkan pesan pertama, misalnya 1 hari setelah customer chat.
+          </p>
+        {% endif %}
+      </section>
+      <section class="rounded-card border border-line bg-white"
+               aria-labelledby="enrollments-title">
+        <div class="border-b border-line p-5">
+          <h2 id="enrollments-title" class="text-lg font-bold">Chat yang di-follow-up</h2>
+          <p class="mt-1 text-sm text-muted">
+            {{ active_total }} berjalan dari {{ enrollment_total }} chat.
+            {% if enrollment_total > enrollments|length %}Menampilkan {{ enrollments|length }} terbaru.{% endif %}
+          </p>
+        </div>
+        {% if enrollments %}
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[40rem] text-left text-sm">
+              <caption class="sr-only">Chat yang di-follow-up</caption>
+              <thead class="bg-surface text-xs uppercase tracking-wider text-muted">
+                <tr>
+                  <th scope="col" class="px-5 py-3">Customer</th>
+                  <th scope="col" class="px-5 py-3">Mulai</th>
+                  <th scope="col" class="px-5 py-3">Status</th>
+                  <th scope="col" class="px-5 py-3">
+                    <span class="sr-only">Aksi</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-line">
+                {% for enrollment in enrollments %}
+                  <tr>
+                    <td class="px-5 py-3">
+                      <span class="font-semibold">{{ enrollment.display_name|default:"Tanpa nama" }}</span>
+                      <span class="block text-muted tabular-nums">{{ enrollment.phone_label }}</span>
+                    </td>
+                    <td class="px-5 py-3 whitespace-nowrap text-muted">{{ enrollment.enrolled_at|date:"j M, H.i" }}</td>
+                    <td class="px-5 py-3">
+                      {% if enrollment.status == "active" %}
+                        {% include "components/status_badge.html" with status="active" label=enrollment.get_status_display %}
+                        {% if enrollment.next_due_at %}
+                          <span class="block text-xs text-muted">Berikutnya: {{ enrollment.next_due_at|date:"j M, H.i" }}</span>
+                        {% endif %}
+                      {% elif enrollment.status == "completed" %}
+                        {% include "components/status_badge.html" with status="draft" label=enrollment.get_status_display %}
+                      {% else %}
+                        {% include "components/status_badge.html" with status="pending" label=enrollment.get_status_display %}
+                        <span class="block text-xs text-muted">{{ enrollment.get_stop_reason_display }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="px-5 py-3 text-right">
+                      {% if enrollment.status == "active" %}
+                        <form method="post"
+                              action="{% url 'followups:enrollment_stop' enrollment.pk %}">
+                          {% csrf_token %}
+                          <button type="submit"
+                                  class="inline-flex min-h-11 items-center gap-1 font-bold text-danger hover:underline">
+                            {% include "components/icon.html" with name="square" class="size-4" %}
+                            Hentikan<span class="sr-only"> follow-up {{ enrollment }}</span>
+                          </button>
+                        </form>
+                      {% elif enrollment.stop_reason != "opted_out" %}
+                        <form method="post"
+                              action="{% url 'followups:enrollment_restart' enrollment.pk %}">
+                          {% csrf_token %}
+                          <button type="submit"
+                                  class="inline-flex min-h-11 items-center gap-1 font-bold text-primary hover:underline">
+                            {% include "components/icon.html" with name="rotate-ccw" class="size-4" %}
+                            Mulai ulang<span class="sr-only"> follow-up {{ enrollment }}</span>
+                          </button>
+                        </form>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="px-5 py-10 text-center text-muted">
+            {% if sequence.trigger == "manual" %}
+              Belum ada chat. Daftarkan kontak lewat panel di samping.
+            {% else %}
+              Belum ada chat. Customer yang chat sesuai pemicu akan muncul di sini.
+            {% endif %}
+          </p>
+        {% endif %}
+      </section>
+    </div>
+    <aside class="flex flex-col gap-6 self-start">
+      <section class="rounded-card border border-line bg-white p-6"
+               aria-labelledby="enroll-title">
+        <h2 id="enroll-title" class="font-bold">Daftarkan kontak</h2>
+        <p class="mt-1 text-sm text-muted">
+          Langkah dihitung mulai sekarang. Kontak yang sudah pernah ikut urutan ini atau membalas STOP dilewati.
+        </p>
+        <form method="post"
+              action="{% url 'followups:enroll_contacts' sequence.pk %}"
+              class="mt-4 flex flex-col gap-4">
+          {% csrf_token %}
+          {% include "components/form_field.html" with field=enroll_form.all_contacts %}
+          <fieldset class="flex flex-col gap-2">
+            <legend class="mb-1 text-sm font-bold">Grup kontak</legend>
+            {% for checkbox in enroll_form.groups %}
+              <label class="flex items-center gap-2.5 text-sm">
+                {{ checkbox.tag }}
+                {{ checkbox.choice_label }}
+              </label>
+            {% empty %}
+              <p class="text-sm text-muted">Belum ada grup kontak.</p>
+            {% endfor %}
+          </fieldset>
+          <button type="submit"
+                  class="inline-flex min-h-11 items-center justify-center gap-2 rounded-button border border-line px-4 font-bold hover:border-primary hover:text-primary"
+                  {% if not steps %}disabled{% endif %}>
+            {% include "components/icon.html" with name="user-plus" class="size-4" %}
+            Daftarkan
+          </button>
+        </form>
+      </section>
+    </aside>
+  </div>
+{% endblock content %}

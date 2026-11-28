@@ -9,6 +9,7 @@ ICONS = [
     "ban",
     "bell-off",
     "bot",
+    "calendar-clock",
     "check",
     "chevron-left",
     "chevron-right",

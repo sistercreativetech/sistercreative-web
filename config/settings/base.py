@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.whatsapp",
     "apps.campaigns",
     "apps.autoreply",
+    "apps.followups",
     "apps.members",
     "apps.dashboard",
 ]
@@ -176,6 +177,9 @@ CAMPAIGN_SCHEDULE_MAX_DAYS = 30
 # Bila saat jadwal tiba masih ada kampanye lain berjalan, coba lagi sampai batas ini.
 CAMPAIGN_SCHEDULE_GRACE_MINUTES = 120
 OPT_OUT_FOOTER = "\n\n_Balas STOP untuk berhenti menerima pesan._"
+# Follow-up: maksimal pesan per member dalam satu putaran pemicu n8n.
+FOLLOWUP_BATCH_SIZE = int(env("FOLLOWUP_BATCH_SIZE", "20"))
+FOLLOWUP_MAX_STEPS = 5
 
 # --- Email ------------------------------------------------------------------
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
